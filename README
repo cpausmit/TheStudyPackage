@@ -1,0 +1,47 @@
+The Study Package
+
+The little package is a collection of tools to run some relatively easily implementable operations
+to study systematic effects from choices made in Monte Carlo simulations.
+
+
+-- Pt matching study
+
+make a list of xrootd locations to be downloaded. Then download them:
+
+  cd TheStudyPackage/
+  ./bin/getGridPacks.sh myGridPack.list
+
+now the gridback have been downloaded to TheStudyPackage/tar.xv/
+
+Now specify what you want to do in ./bin/run.sh. Now submit your job
+
+  ./bin/makeFileList.sh ./tar.xz/ttbar.list ./config/ttbar
+
+First make the LHE files
+
+  ./bin/submitLhe.sh ttbar /mnt/hscratch/paus/cms/hist ~/cms/logs
+
+Now submit the full request
+
+  ./bin/submit.sh ttbar /mnt/hscratch/paus/cms/hist ~/cms/logs
+
+Finally publish the results
+
+  ./bin/extractResults.sh ttbar /mnt/hscratch/paus/cms/hist ~/cms/logs
+
+
+-- MonoJet grid generation
+
+Phil's original version
+  cd /afs/cern.ch/user/p/pharris/pharris/public/bacon/prod/CMSSW_7_4_12_patch1/src/MonoX/ModelScan
+  cmsenv
+  cd -
+  ./generate.py --med 500 --dm 1 --proc 805 --gq 1.0
+
+Our version
+  xrdcp root://cms-xrd-global.cern.ch//store/cmst3/user/pharris/gen/POWHEG-BOX-V2_gen.tar.gz ./
+
+  ./bin/generateCp.py  --med 500 --dm 1 --proc 805 --gq 1.0
+
+  ./bin/generateCp.py  --med 2000 --dm 100 --proc 800 --gq 1.0 --nev 100
+  ./bin/generateCp.py  --med 2000 --dm 100 --proc 801 --gq 1.0 --nev 100
