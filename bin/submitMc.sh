@@ -67,7 +67,7 @@ do
     continue
   fi
 
-  outputFiles=${TASK}_${gpack}.lhe,${TASK}_${gpack}_gen.root,${TASK}_${gpack}_aodsim.root
+  outputFiles=${TASK}_${gpack}.lhe,${TASK}_${gpack}_miniaodsim.root,${TASK}_${gpack}_bambu.root
 
   # see whether the files are already there
 
@@ -104,7 +104,7 @@ do
 cat > submit.cmd <<EOF
 Universe                = vanilla
 Environment             = "HOSTNAME=$HOSTNAME"
-Requirements            = (isUndefined(IS_GLIDEIN) || OSGVO_OS_STRING == "RHEL 6") &&
+Requirements            = (isUndefined(IS_GLIDEIN) || OSGVO_OS_STRING == "RHEL 6") && \
                           Arch == "X86_64" && \
                           Disk >= DiskUsage && (Memory * 1024) >= ImageSize && HasFileTransfer &&  \
                           Disk >= (10000 * 1024) && \

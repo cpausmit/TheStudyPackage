@@ -145,7 +145,8 @@ cat $workDir/../python/${BAM_PY}.py-template \
     > ${BAM_PY}.py
 
 executeCmd time cmsRun ${BAM_PY}.py
-
+# this is a little naming issue that has to be fixed
+mv ${TASK}_${GPACK}_bambu*  ${TASK}_${GPACK}_bambu.root
 
 # finally, move all files needed to the starting area
 executeCmd mv ${TASK}_${GPACK}* $workDir/..
