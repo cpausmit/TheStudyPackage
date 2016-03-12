@@ -97,9 +97,6 @@ do
     echo " Done:   $gpack"
     continue
   fi
-
-
-  echo " Submitting: $script $TASK $gpack"
  
 cat > submit.cmd <<EOF
 Universe                = vanilla
