@@ -12,6 +12,13 @@ echo "  --> $*"
 TASK=$1
 OUTDIR=$2
 LOGDIR=$3
+if [ "$#" -gt 3 ]
+then
+  echo ""
+  echo -n "CLEANING up all potentially exiting files. Are you sure? "
+  read 
+  CLEANUP=$4
+fi
 
 # Define our work directory
 workDir=$PWD
@@ -31,6 +38,12 @@ then
   echo " ERROR - one of the relevant production directories does not exist. EXIT."
   echo " -> $LOGDIR $OUTDIR"
   exit 1
+fi
+
+# if we start from scratch, remove it all
+if [ "$CLEANUP" == "yes" ]
+then
+  rm -rf -rf $LOGDIR/$TASK $OUTDIR/$TASK
 fi
 
 # Make sure local directories (log and output) exist
