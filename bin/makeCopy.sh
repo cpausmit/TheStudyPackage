@@ -7,6 +7,7 @@
 # make sure we are locked and loaded
 [ -d "./bin" ] || ( tar fzx default.tgz )
 source ./bin/helpers.sh
+setupProxy
 
 # define base output location
 SERVER="se01.cmsaf.mit.edu"
@@ -16,10 +17,6 @@ USER_DIR="/user/paus/study"
 # command line arguments
 TASK="$1"
 GPACK="$2"
-
-ls -lhrt
-export X509_USER_PROXY=`pwd`/`echo x509*`
-env | grep  X509
 
 mkdir ./work
 cd    ./work

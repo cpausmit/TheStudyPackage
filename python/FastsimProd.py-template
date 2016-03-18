@@ -72,7 +72,7 @@ mixFiles = [ '/store/mc/RunIISpring15PrePremix/Neutrino_E-10_gun/GEN-SIM-DIGI-RA
 
 process.mixData.input.fileNames = cms.untracked.vstring(['root://cms-xrd-global.cern.ch/' + f for f in mixFiles])
 from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
-process.GlobalTag = GlobalTag(process.GlobalTag, 'MCRUN2_74_V9', '')
+process.GlobalTag = GlobalTag(process.GlobalTag,'MCRUN2_74_V9','')
 
 # Path and EndPath definitions
 process.simulation_step = cms.Path(process.psim)

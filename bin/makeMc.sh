@@ -6,8 +6,9 @@
 #===================================================================================================
 # make sure we are locked and loaded
 [ -d "./bin" ] || ( tar fzx default.tgz )
-source ./bin/helpers.sh
 export BASEDIR=`pwd`
+source ./bin/helpers.sh
+setupProxy
 
 # command line arguments
 TASK="$1"
@@ -155,6 +156,9 @@ tar fzx $BASEDIR/tgz/copy.tgz
 pwd=`pwd`
 for file in `echo ${TASK}_${GPACK}*`
 do
+  # always first show the proxy
+  voms-proxy-info -all
+  # now do the copy
   executeCmd time ./cmscp.py \
     --debug --middleware OSG --PNN $REMOTE_SERVER --se_name $REMOTE_SERVER \
     --inputFileList $pwd/${file} \

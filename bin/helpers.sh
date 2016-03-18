@@ -81,3 +81,21 @@ function setupCmssw {
   echo "============================================================"
   echo ""
 }
+
+function setupProxy {
+  # setup the proxy for remote copy and data access etc. (function expects proxy in pwd)
+
+  echo ""
+  echo "============================================================"
+  echo " Setting up the x509 proxy"
+  ls -lhrt
+  proxy_name=`echo x509*`
+  if [ "$proxy_name" == 'x509*' ]
+  then
+    echo " ERROR -- there seems to be no proxy. -> $proxy_name"
+   fi
+  export X509_USER_PROXY=`pwd`/$proxy_name
+  env | grep  X509
+  echo "============================================================"
+  echo ""
+}
