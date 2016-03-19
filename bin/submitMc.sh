@@ -80,7 +80,7 @@ do
     continue
   fi
 
-  outputFiles=${TASK}_${gpack}.lhe,${TASK}_${gpack}_miniaodsim.root,${TASK}_${gpack}_bambu.root
+  outputFiles=${TASK}_${gpack}_bambu.root
 
   # see whether the files are already there
 

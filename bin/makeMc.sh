@@ -166,8 +166,10 @@ do
     --for_lfn ${REMOTE_USER_DIR}/${TASK}
 done
 
-exit 0
+# finally make condor happy because it also wants some of the files
+executeCmd mv $WORKDIR/*bambu*.root $BASEDIR/
 
+exit 0
 
 ## pwd=`pwd` # just to make sure it is the full directory
 ## for file in `echo ${TASK}_${GPACK}*`
@@ -178,4 +180,3 @@ exit 0
 ##     lcg-cp -D srmv2 -b file://$pwd/$file \
 ##            srm://$REMOTE_SERVER:8443/${REMOTE_BASE}${REMOTE_USER_DIR}/${TASK}/$file
 ## done
-
