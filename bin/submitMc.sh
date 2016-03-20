@@ -9,9 +9,7 @@ echo " "
 echo "Starting data processing with arguments:"
 echo "  --> $*"
 
-TASK=$1
-OUTDIR=$2
-LOGDIR=$3
+TASK=$1; OUTDIR=$2; LOGDIR=$3
 if [ "$#" -gt 3 ]
 then
   echo ""
@@ -154,5 +152,3 @@ EOF
 done
 
 exit 0
-
-## (UidDomain == "cmsaf.mit.edu" || UidDomain == "mit.edu") && \
