@@ -1,5 +1,6 @@
 done
 set run_card   nevents XX-NEV-XX
+set run_card   iseed   XX-SEED-XX
 set param_card mx      XX-DM-XX
 set param_card mzprime XX-MED-XX
 set param_card cV      XX-CV-XX

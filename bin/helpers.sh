@@ -99,3 +99,22 @@ function setupProxy {
   echo "============================================================"
   echo ""
 }
+
+function tarMeUp {
+  # tar up the present project but be careful
+
+  baseDir=`pwd`
+  baseDir=`basename $baseDir`
+
+  if [ "$baseDir" == "TheStudyPackage" ]
+  then
+    echo " Starting the TAR"
+    cd ..
+    tar fzc $baseDir.tgz $baseDir
+    pwd
+    ls -lhrt $baseDir.tgz
+    cd -
+  else
+    echo " ERROR - Tar failed, wrong initial directory: $baseDir -> "`pwd`
+  fi
+}
