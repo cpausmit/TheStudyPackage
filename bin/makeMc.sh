@@ -145,6 +145,9 @@ mv ${TASK}_${GPACK}_bambu*  ${TASK}_${GPACK}_bambu.root
 # push our files out to the Tier-2
 ####################################################################################################
 cd $WORKDIR
+pwd
+ls -lhrt
+
 # define base output location
 REMOTE_SERVER="se01.cmsaf.mit.edu"
 REMOTE_BASE="srm/v2/server?SFN=/mnt/hadoop/cms/store"

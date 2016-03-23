@@ -118,3 +118,48 @@ function tarMeUp {
     echo " ERROR - Tar failed, wrong initial directory: $baseDir -> "`pwd`
   fi
 }
+
+
+function distributeToTier2 {
+  # distribute present release to Tier2
+
+  baseDir=`pwd`
+  baseDir=`basename $baseDir`
+
+  if [ "$baseDir" == "TheStudyPackage" ] && [ -e "../$baseDir.tgz" ]
+  then
+    executeCmd scp ../$baseDir.tgz se01.cmsaf.mit.edu:cms/root/$baseDir.tgz
+    executeCmd ssh se01.cmsaf.mit.edu "cd cms/root; rm -rf $baseDir; tar fzx $baseDir.tgz; ls -lhrt"
+  else
+    echo " ERROR - failed, tar ball? and right directory?: $baseDir -> "`pwd`
+  fi
+}
+
+function split {
+  # given raw list with for example 50000 events will be split up into NSEEDS pieces into split file
+
+  FILE="$1"
+  NSEEDS="$2"
+  SPLIT_FILE="$3"
+
+  rm    $SPLIT_FILE
+  touch $SPLIT_FILE
+
+  for line in `cat $FILE`
+  do
+    core=`echo $line | sed 's/_nev-[0-9]*//'`
+    nTotal=`echo $line | sed 's/.*_nev-//'| sed 's/\([0-9]*\)_.*/\1/'`
+    nEvents=`echo $nTotal $NSEEDS | awk '{ print $1/$2 }'`
+
+    echo " LINE: $line  -> $core  $nTotal  $nEvents"
+    i=0
+    while [ $i -lt $NSEEDS ]
+    do    
+      seed=`echo $i | awk '{ print 1000+$1}'`
+      echo "${core}_nev-${nEvents}_seed-${seed}"
+      echo "${core}_nev-${nEvents}_seed-${seed}" >> $SPLIT_FILE
+      let "i+=1"
+    done
+  done
+
+}

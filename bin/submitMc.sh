@@ -13,7 +13,7 @@ TASK=$1; OUTDIR=$2; LOGDIR=$3
 if [ "$#" -gt 3 ]
 then
   echo ""
-  echo -n "CLEANING up all potentially exiting files. Are you sure? "
+  echo -n "CLEANING up all potentially exiting output and log files. Are you sure? "
   read 
   CLEANUP=$4
 fi
@@ -60,7 +60,8 @@ script=$workDir/bin/makeMc.sh
 x509File=/tmp/x509up_u`id -u`
 
 # Make a record of ongoing jobs
-condor_q -global $USER -format "%s " Cmd -format "%s \n" Args | grep makeLhe > /tmp/condorQueue.$$
+condor_q -global $USER -format "%s " Cmd -format "%s \n" Args \
+  | grep `basename $script` > /tmp/condorQueue.$$
 
 # Looping through each single fileset and submitting the condor jobs
 echo ""
@@ -116,6 +117,7 @@ Requirements            = (isUndefined(IS_GLIDEIN) || OSGVO_OS_STRING == "RHEL 6
                           Arch == "X86_64" && \
                           Disk >= DiskUsage && (Memory * 1024) >= ImageSize && HasFileTransfer &&  \
                           Disk >= (10000 * 1024) && \
+                          CVMFS_cms_cern_ch_REVISION >= 21812 && \
                           Machine != "t3btch039.mit.edu" && Machine != "t3btch008.mit.edu"
 Notification            = Error
 Executable              = $script
@@ -136,6 +138,7 @@ when_to_transfer_output = ON_EXIT
 Queue
 EOF
 
+  #echo "condor_submit submit.cmd >& /dev/null"
   condor_submit submit.cmd >& /dev/null
   
   # make sure it worked
