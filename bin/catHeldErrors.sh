@@ -2,7 +2,8 @@
 #==================================================================================================
 NLINES="$1"
 
-holdReason=`condor_q -l -constraint "HoldReasonCode==13" -format "%s\n" LastRemoteHost -format "%s\n" HoldReason`
+cHeld="condor_q $USER -constraint HoldReasonCode!=0"
+holdReason=`$cHeld -format "%s\n" LastRemoteHost -format "%s\n\n" HoldReason`
 echo ""
 echo "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
 echo "HOLD REASON SUMMARY"
@@ -14,8 +15,8 @@ echo " "
 echo -n " Press <return> to see the error logs. "
 read continue
 
-errorFiles=`condor_q $USER  -constraint "HoldReasonCode==13" -format "%s" ClusterId -format ":%s\n" Err`
-for error in $errorFiles
+errors=`$cHeld -format "%s" ClusterId -format ":%s\n" Err`
+for error in $errors
 do
   #echo "analyze: $error"
   clusterId=`echo $error | cut -d: -f1`
