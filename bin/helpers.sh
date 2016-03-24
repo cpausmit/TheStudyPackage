@@ -82,6 +82,28 @@ function setupCmssw {
   echo ""
 }
 
+function configureSite {
+  # in case we are not at a CMS site we need to have a configuration
+
+  link="/cvmfs/cms.cern.ch/SITECONF/local"
+
+  if [ -d "`readlink $link`" ]
+  then
+    echo " Link exists. No action needed. ($link)"
+  else
+    echo " WARNING -- Link points nowhere! ($link)"
+    echo "  -- unpacking private local config to recover"
+    executeCmd tar fzx $BASEDIR/tgz/siteconf.tgz
+    cd SITECONF
+    rm -f local
+    ln -s ./T3_US_OSG ./local
+    ls -lhrt
+    cd -
+    # make sure this is the config to be used
+    export CMS_PATH=`pwd`
+  fi
+}
+
 function setupProxy {
   # setup the proxy for remote copy and data access etc. (function expects proxy in pwd)
 
@@ -92,9 +114,11 @@ function setupProxy {
   proxy_name=`echo x509*`
   if [ "$proxy_name" == 'x509*' ]
   then
-    echo " ERROR -- there seems to be no proxy. -> $proxy_name"
-   fi
-  export X509_USER_PROXY=`pwd`/$proxy_name
+    echo " WARNING -- no proxy in this directory -> look in standard places"
+    export X509_USER_PROXY=`voms-proxy-info -p`
+  else
+    export X509_USER_PROXY=`pwd`/$proxy_name    
+  fi
   env | grep  X509
   echo "============================================================"
   echo ""
@@ -161,5 +185,4 @@ function split {
       let "i+=1"
     done
   done
-
 }

@@ -31,6 +31,9 @@ echo " Start to work now"
 pwd
 ls -lhrt
 
+# make sure site is configured, if not configure it (for DB access, not needed for lhe/gen)
+configureSite
+
 # initialize LHE/GEN step
 setupCmssw $GEN_CMSSW_VERSION $GEN_PY
 export PYTHONPATH="${PYTHONPATH}:$BASEDIR/python"
@@ -96,7 +99,7 @@ cat $BASEDIR/python/${SIM_PY}.py-template \
 executeCmd time cmsRun ${SIM_PY}.py
 
 ####################################################################################################
-# miniaod step
+# miniaodsim step
 ####################################################################################################
 
 cd $WORKDIR
@@ -128,7 +131,7 @@ export PYTHONPATH="${PYTHONPATH}:$BASEDIR/python"
 
 # unpack the tar
 cd CMSSW_$BAM_CMSSW_VERSION
-executeCmd time tar fzx $BASEDIR/tgz/bambu043.tgz
+executeCmd tar fzx $BASEDIR/tgz/bambu043.tgz
 cd $WORKDIR
 
 # prepare the python config from the given templates
@@ -157,7 +160,7 @@ REMOTE_USER_DIR="/user/paus/study"
 setupCmssw 7_6_3 cmscp.py
 tar fzx $BASEDIR/tgz/copy.tgz
 pwd=`pwd`
-for file in `echo ${TASK}_${GPACK}*`
+for file in `echo ${TASK}_${GPACK}_bambu* ${TASK}_${GPACK}_miniaodsim*`
 do
   # always first show the proxy
   voms-proxy-info -all
@@ -170,7 +173,7 @@ do
 done
 
 # finally make condor happy because it also wants some of the files
-executeCmd mv $WORKDIR/*bambu*.root $BASEDIR/
+executeCmd mv $WORKDIR/*.root $BASEDIR/
 
 exit 0
 

@@ -50,14 +50,17 @@ mkdir -p $LOGDIR/$TASK $OUTDIR/$TASK
 # Make main tar ball and save it for later
 tar fzc default.tgz bin/ config/ generators/ python/ root/ tgz/
 mv      default.tgz $LOGDIR/$TASK
-sleep 4
-tar fzt $LOGDIR/$TASK/default.tgz
+#sleep 4
+#tar fzt $LOGDIR/$TASK/default.tgz
 
 # Set the script file
 script=$workDir/bin/makeMc.sh
 
 # Make sure there is a globus tickets available
 x509File=/tmp/x509up_u`id -u`
+
+# Make a record of completed jobs
+glexec ls -1 /mnt/hadoop/cms/store/user/paus/study/$TASK > /tmp/done.$$
 
 # Make a record of ongoing jobs
 condor_q -global $USER -format "%s " Cmd -format "%s \n" Args \
@@ -69,6 +72,7 @@ echo "# Submitting jobs to condor"
 echo ""
 
 # loop over the relevant files
+nD=0; nQ=0; nS=0
 for gpack in `cat ./config/${TASK}.list`
 do
 
@@ -76,37 +80,48 @@ do
   if [ "$inQueue" != "" ]
   then
     echo " Queued: $gpack"
+    let "nQ+=1"
     continue
   fi
 
-  outputFiles=${TASK}_${gpack}_bambu.root
+  # not sustainable for mass jobs #
+  #outputFiles=${TASK}_${gpack}_bambu.root
+  outputFiles=
 
-  # see whether the files are already there
+  ## # see whether the files are already there
+  ## complete=1
+  ## for output in `echo $outputFiles | tr ',' ' '`
+  ## do
+  ##   # test every required file for existence and non-null length
+  ##   size=0
+  ##   if [ -e "$OUTDIR/$TASK/$output" ]
+  ##   then
+  ##     size=`stat --printf="%s" $OUTDIR/$TASK/$output`
+  ##     #echo " Output: $output - $size"
+  ##   fi
+  ##   # break out of the loop of one file missing or incomplete
+  ##   if [ "$size" == "0" ]
+  ##   then
+  ##     complete=0
+  ##     break
+  ##   fi  
+  ## done
 
+  exists=`grep ${TASK}_${gpack}_bambu.root /tmp/done.$$`
   complete=1
-  for output in `echo $outputFiles | tr ',' ' '`
-  do
-    # test every required file for existence and non-null length
-    size=0
-    if [ -e "$OUTDIR/$TASK/$output" ]
-    then
-      size=`stat --printf="%s" $OUTDIR/$TASK/$output`
-      #echo " Output: $output - $size"
-    fi
-    # break out of the loop of one file missing or incomplete
-    if [ "$size" == "0" ]
-    then
-      complete=0
-      break
-    fi  
-  done
+  if [ "$exists" == "" ]
+  then
+    complete=0
+  fi
 
   # make decision of submission
   if [ "$complete" == "0" ]
   then
     echo " Submit: $gpack     <<===="
+    let "nS+=1"
   else
     echo " Done:   $gpack"
+    let "nD+=1"
     continue
   fi
  
@@ -153,5 +168,11 @@ EOF
   rm submit.cmd
 
 done
+
+echo ""
+echo " =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
+echo "  SUBMISSION SUMMARY -- nDone: $nD -- nQueued: $nQ -- nSubmitted: $nS"
+echo " =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
+echo ""
 
 exit 0
