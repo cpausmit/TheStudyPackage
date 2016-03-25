@@ -5,7 +5,7 @@
 #
 #===================================================================================================
 # make sure we are locked and loaded
-[ -d "./bin" ] || ( tar fzx default.tgz )
+[ -d "./bin" ] || ( tar fzx default.tgz; rm default.tgz )          # make sure to cleanup right away
 export BASEDIR=`pwd`
 source ./bin/helpers.sh
 setupProxy
@@ -60,6 +60,8 @@ else
   exit 1
 fi
 
+showDiskSpace
+
 ####################################################################################################
 # hadronize step
 ####################################################################################################
@@ -78,6 +80,8 @@ cat $BASEDIR/python/${GEN_PY}.py-template \
     > ${GEN_PY}.py
 
 executeCmd time cmsRun ${GEN_PY}.py
+
+showDiskSpace
 
 ####################################################################################################
 # fastsim step
@@ -98,6 +102,11 @@ cat $BASEDIR/python/${SIM_PY}.py-template \
 
 executeCmd time cmsRun ${SIM_PY}.py
 
+showDiskSpace
+
+# now aodsim is available, time to cleanup LHE and gen
+rm $WORKDIR/${TASK}_${GPACK}.lhe $WORKDIR/${TASK}_${GPACK}_gen.root
+
 ####################################################################################################
 # miniaodsim step
 ####################################################################################################
@@ -117,15 +126,17 @@ cat $BASEDIR/python/${MIN_PY}.py-template \
 
 executeCmd time cmsRun ${MIN_PY}.py
 
+showDiskSpace
+
+####################################################################################################
+# initialize BAMBU
+####################################################################################################
 # bambu step
 
 cd $WORKDIR
 pwd
 ls -lhrt
 
-####################################################################################################
-# initialize BAMBU
-####################################################################################################
 setupCmssw $BAM_CMSSW_VERSION $BAM_PY
 export PYTHONPATH="${PYTHONPATH}:$BASEDIR/python"
 
@@ -143,6 +154,8 @@ cat $BASEDIR/python/${BAM_PY}.py-template \
 executeCmd time cmsRun ${BAM_PY}.py
 # this is a little naming issue that has to be fixed
 mv ${TASK}_${GPACK}_bambu*  ${TASK}_${GPACK}_bambu.root
+
+showDiskSpace
 
 ####################################################################################################
 # push our files out to the Tier-2
@@ -166,7 +179,7 @@ do
   voms-proxy-info -all
   # now do the copy
   executeCmd time ./cmscp.py \
-    --debug --middleware OSG --PNN $REMOTE_SERVER --se_name $REMOTE_SERVER \
+    --middleware OSG --PNN $REMOTE_SERVER --se_name $REMOTE_SERVER \
     --inputFileList $pwd/${file} \
     --destination srm://$REMOTE_SERVER:8443/${REMOTE_BASE}${REMOTE_USER_DIR}/${TASK} \
     --for_lfn ${REMOTE_USER_DIR}/${TASK}
@@ -175,14 +188,13 @@ done
 # finally make condor happy because it also wants some of the files
 executeCmd mv $WORKDIR/*.root $BASEDIR/
 
-exit 0
+# finally leave the site super clean
 
-## pwd=`pwd` # just to make sure it is the full directory
-## for file in `echo ${TASK}_${GPACK}*`
-## do
-## 
-## 
-##   executeCmd time \
-##     lcg-cp -D srmv2 -b file://$pwd/$file \
-##            srm://$REMOTE_SERVER:8443/${REMOTE_BASE}${REMOTE_USER_DIR}/${TASK}/$file
-## done
+cd $BASEDIR
+exectueCmd rm -rf $WORKDIR *.root x509* \
+              bin/ config/ fromPhil/ fwlite/ generators/ html/ LICENSE  python/ README root/ tgz/
+pwd
+ls -lhrt
+echo " ---- D O N E ----"
+
+exit 0

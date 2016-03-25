@@ -40,6 +40,21 @@ function printOutputfiles {
   echo $list
 }
 
+function showDiskSpace {
+  # implement a simple minded summary of the available disk space and usage
+
+  [ -z $BASEDIR ] && $BASEDIR="./"
+
+  echo ""
+  echo " Disk space overview "
+  echo " =================== "
+  df -h $BASEDIR
+  echo ""
+  echo " Disk space usage "
+  echo " ================ "
+  du -sh $BASEDIR/*
+}
+
 function initialState {
   # provide a summary of where we are when we start the job
 
@@ -48,19 +63,20 @@ function initialState {
   echo "Arguments: $*"
   
   # some basic printing
-  echo " ";
-  echo "${h}: Show who and where we are";
+  echo " "
+  echo "${h}: Show who and where we are"
   echo " start time    : "`date`
-  echo " user executing: "`id`;
-  echo " running on    : "`hostname`;
-  echo " executing in  : "`pwd`;
-  echo " submitted from: $HOSTNAME";
+  echo " user executing: "`id`
+  echo " running on    : "`hostname`
+  echo " executing in  : "`pwd`
+  echo " submitted from: $HOSTNAME"
   echo ""
-  echo " HOME:" ~/;
-  echo " ";
+  echo ""
+  echo " HOME:" ~/
+  echo " "
   env
   ls -lhrt
-  #find ./
+  showDiskSpace
 }  
 
 function setupCmssw {

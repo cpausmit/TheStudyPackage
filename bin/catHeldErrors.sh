@@ -15,12 +15,13 @@ echo " "
 echo -n " Press <return> to see the error logs. "
 read continue
 
-errors=`$cHeld -format "%s" ClusterId -format ":%s\n" Err`
+errors=`$cHeld -format "%s" ClusterId -format ":%s" Err -format ":%s\n" HoldReason|tr -s ' '|tr ' ' '+' `
 for error in $errors
 do
   #echo "analyze: $error"
-  clusterId=`echo $error | cut -d: -f1`
-  errFile=`  echo $error | cut -d: -f2`
+  clusterId=` echo $error | cut -d: -f1`
+  errFile=`   echo $error | cut -d: -f2`
+  holdReason=`echo $error | cut -d: -f3-10`
 
   outFile=`echo $errFile | sed "s@.err@.out@"`
   logFile=`echo $errFile | sed "s@.err@.log@"`
@@ -40,22 +41,27 @@ do
 
   #echo "analyze outfile: $outFile"
   #echo " -- location host $outFile"
-  node=`grep 'running on' $outFile`
+  node=`grep 'running on' $outFile | xargs`
   #echo " -- location GI $outFile"
-  glidein=`egrep 'GLIDEIN_SEs|GLIDEIN_ResourceName' $outFile`
+  glidein=`egrep 'GLIDEIN_SEs|GLIDEIN_ResourceName' $outFile|tr '\n' ',' | xargs`
   #echo " -- xrd"
-  xrdFail=`egrep 'Failed to open the file|\[ERROR\] Operation expired' $errFile`
+  xrdFail=`egrep 'Failed to open the file|\[ERROR\] Operation expired' $errFile|tr '\n' ','`
   #echo " -- siteconf"
-  siteConf=`grep 'Valid site-local-config not found' $errFile`
-  frontier=`grep '\[frontier.c:1111\]: No more proxies' $errFile`
+  siteConf=`grep 'Valid site-local-config not found' $errFile | head -1`
+  #echo " -- frontier"
+  frontier=`grep '\[frontier.c:1111\]: No more proxies' $errFile | head -1`
+  #echo " -- diskspace"
+  space=`grep 'No space left on device' $errFile`
 
   echo ""
   echo "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
   echo "ERROR FILE: $errFile"
-  echo " location: $node -- $glidein"
-  echo " xrootd:   $xrdFail"
-  echo " siteconf: $siteConf"
-  echo " frontier: $frontier"
+  echo " hold reason: $holdReason"
+  echo " location:    $node -- $glidein"
+  echo " xrootd:      $xrdFail"
+  echo " siteconf:    $siteConf"
+  echo " frontier:    $frontier"
+  echo " space:       $space"
   echo "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
   if [ -z "$NLINES" ]
   then
@@ -64,7 +70,8 @@ do
     head -$NLINES $errFile
   fi
 
-  echo " Remove this held job? [N/y] "
+  echo ""
+  echo -n " Remove this held job? [N/y] "
   read remove
   if [ "$remove" == "y" ]
   then
