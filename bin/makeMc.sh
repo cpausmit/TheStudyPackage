@@ -185,14 +185,18 @@ do
     --for_lfn ${REMOTE_USER_DIR}/${TASK}
 done
 
-# finally make condor happy because it also wants some of the files
+# make condor happy because it also wants some of the files
 executeCmd mv $WORKDIR/*.root $BASEDIR/
 
-# finally leave the site super clean
+# leave the worker super clean
 
-cd $BASEDIR
-exectueCmd rm -rf $WORKDIR *.root x509* \
-              bin/ config/ fromPhil/ fwlite/ generators/ html/ LICENSE  python/ README root/ tgz/
+testBatch
+if [ "$?" == "1" ]
+then
+  cd $BASEDIR
+  executeCmd rm -rf $WORKDIR *.root x509* \
+                bin/ config/ fromPhil/ fwlite/ generators/ html/ LICENSE  python/ README root/ tgz/
+fi
 pwd
 ls -lhrt
 echo " ---- D O N E ----"

@@ -7,7 +7,7 @@
 export BASEDIR=`pwd`
 source ./bin/helpers.sh
 # tell us the initial state
-initialState $*
+iniState $*
 
 BASE=/mnt/hadoop/cms/store/user/paus
 CORE=fastsm/043
@@ -22,33 +22,43 @@ echo " "
 
 # Make a record of completed jobs and directories
 glexec ls -1 $BASE/$CORE/${TASK}_* > /tmp/done.$$
+echo ""
+echo " FILES DONE"
+echo ""
+cat /tmp/done.$$
 
-# loop over the relevant files
-for gpack in `cat ./config/${TASK}.list|sed 's/\(.*\)_nev.*$/\1/'|sort -u`
+# extract the relevant parameters for publication
+glexec ls -1 $BASE/$PROD/${TASK}_*bambu.root | grep root > /tmp/move.$$
+echo ""
+echo " FILES TO MOVE"
+echo ""
+cat /tmp/move.$$
+
+for fullFile in `cat /tmp/move.$$`
 do
+  dir=`dirname $fullFile`
+  file=`basename $fullFile`
+  gpack=`echo $file | sed "s/${TASK}_//" | sed 's/\(.*\)_nev.*$/\1/'`
 
-  # extract the relevant parameters for publication
-  glexec ls -1 $BASE/$PROD/${TASK}_${gpack}*bambu.root | grep root > /tmp/move.$$
+  exists=`grep $file /tmp/done.$$`
+  if [ "$exists" == "" ]
+  then
+    echo " Moving file: $file"
+    exeCmd \
+      glexec "mkdir -p $BASE/$CORE/${TASK}_$gpack;
+              chmod a+rwx $BASE/$CORE/${TASK}_$gpack;
+              mv $fullFile $BASE/$CORE/${TASK}_$gpack/"
+  else
+    echo " DONE ALREADY -- ReMoving file: $file"
+    exeCmd \
+      glexec "rm $fullFile"
+  fi
 
-  for file in `cat /tmp/move.$$`
-  do
-     file=`basename $file`
-     
-     exists=`grep $file /tmp/done.$$`
-     if [ "$exists" == "" ]
-     then
-       echo " Moving file: $file"
-       exeCmd \
-         glexec "mkdir -p $BASE/$CORE/${TASK}_$gpack;
-                 chmod a+rwx $BASE/$CORE/${TASK}_$gpack;
-                 mv $BASE/$PROD/$file $BASE/$CORE/${TASK}_$gpack/"
-     else
-       echo " DONE ALREADY -- ReMoving file: $file"
-       exeCmd \
-         glexec "rm $BASE/$PROD/$file"
-     fi
-  
-  done
 done
+
+## # loop over the relevant files
+## for gpack in `cat ./config/${TASK}.list|sed 's/\(.*\)_nev.*$/\1/'|sort -u`
+## do
+## done
 
 exit 0

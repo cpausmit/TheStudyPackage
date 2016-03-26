@@ -15,15 +15,15 @@ function executeCmd {
   echo " "
 }  
 
-function testInteractive {
-  # implement simple minded/not perfect test to see whether script is called interactively
+function testBatch {
+  # implement simple minded/not perfect test to see whether script is run in batch
 
-  interactive=0
-  if [ "`echo $PWD | grep $USER`" != "" ]
+  batch=0
+  if [ "`echo $PWD | grep $USER`" == "" ]
   then
-    interactive=1
+    batch=1
   fi
-  return $interactive
+  return $batch
 }
 
 function printOutputfiles {
@@ -60,8 +60,8 @@ function showDiskSpace {
   du -sh $BASEDIR/*
 }
 
-function initialState {
-  # provide a summary of where we are when we start the job
+function iniState {
+  # provide a short summary of where we are when we start the job
 
   h=`basename $0`
   echo "Script:    $h"
@@ -76,6 +76,12 @@ function initialState {
   echo " executing in  : "`pwd`
   echo " submitted from: $HOSTNAME"
   echo ""
+}  
+
+function initialState {
+  # provide a summary of where we are when we start the job
+
+  iniState
   echo ""
   echo " HOME:" ~/
   echo " "
