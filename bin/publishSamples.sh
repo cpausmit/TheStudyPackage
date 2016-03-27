@@ -39,9 +39,7 @@ do
   dir=`dirname $fullFile`
   file=`basename $fullFile`
   gpack=`echo $file | sed "s/${TASK}_//" | sed 's/\(.*\)_nev.*$/\1/'`
-
-  exists=`grep $file /tmp/done.$$`
-  if [ "$exists" == "" ]
+  if [ "`grep $file /tmp/done.$$`" == "" ]
   then
     echo " Moving file: $file"
     exeCmd \
@@ -53,12 +51,6 @@ do
     exeCmd \
       glexec "rm $fullFile"
   fi
-
 done
-
-## # loop over the relevant files
-## for gpack in `cat ./config/${TASK}.list|sed 's/\(.*\)_nev.*$/\1/'|sort -u`
-## do
-## done
 
 exit 0

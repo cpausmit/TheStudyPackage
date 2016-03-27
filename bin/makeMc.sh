@@ -31,7 +31,7 @@ echo " Start to work now"
 pwd
 ls -lhrt
 
-# make sure site is configured, if not configure it (for DB access, not needed for lhe/gen)
+# make sure site is configured, if not, configure it (for DB access, not needed for lhe/gen)
 configureSite
 
 # initialize LHE/GEN step
@@ -105,7 +105,7 @@ executeCmd time cmsRun ${SIM_PY}.py
 showDiskSpace
 
 # now aodsim is available, time to cleanup LHE and gen
-rm $WORKDIR/${TASK}_${GPACK}.lhe $WORKDIR/${TASK}_${GPACK}_gen.root
+exeCmd rm $WORKDIR/${TASK}_${GPACK}.lhe $WORKDIR/${TASK}_${GPACK}_gen.root
 
 ####################################################################################################
 # miniaodsim step
@@ -185,7 +185,7 @@ do
     --for_lfn ${REMOTE_USER_DIR}/${TASK}
 done
 
-# make condor happy because it also wants some of the files
+# make condor happy because it also might want some of the files
 executeCmd mv $WORKDIR/*.root $BASEDIR/
 
 # leave the worker super clean
@@ -197,6 +197,7 @@ then
   executeCmd rm -rf $WORKDIR *.root x509* \
                 bin/ config/ fromPhil/ fwlite/ generators/ html/ LICENSE  python/ README root/ tgz/
 fi
+
 pwd
 ls -lhrt
 echo " ---- D O N E ----"
