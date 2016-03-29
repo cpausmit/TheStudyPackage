@@ -226,6 +226,10 @@ then
                 bin/ config/ fromPhil/ fwlite/ generators/ html/ LICENSE  python/ README root/ tgz/
 fi
 
+# create the pickup output file for condor
+
+touch $BASEDIR/${TASK}_${GPACK}.empty
+
 pwd
 ls -lhrt
 echo " ---- D O N E ----"

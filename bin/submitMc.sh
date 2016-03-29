@@ -102,7 +102,7 @@ do
 
   # not sustainable for mass jobs #
   #outputFiles=${TASK}_${gpack}_bambu.root
-  outputFiles=
+  outputFiles=${TASK}_${gpack}.empty
 
   ## # see whether the files are already there
   ## complete=1
@@ -146,10 +146,11 @@ Universe                = vanilla
 Environment             = "HOSTNAME=$HOSTNAME"
 Requirements            = (isUndefined(IS_GLIDEIN) || OSGVO_OS_STRING == "RHEL 6") && \
                           Arch == "X86_64" && \
-                          Disk >= DiskUsage && (Memory * 1024) >= ImageSize && HasFileTransfer &&  \
-                          Disk >= (10000 * 1024) && \
+                          HasFileTransfer && \
                           CVMFS_cms_cern_ch_REVISION >= 21812 && \
                           Machine != "t3btch039.mit.edu" && Machine != "t3btch008.mit.edu"
+Request_Memory          = 2 GB
+Request_Disk            = 5 GB
 Notification            = Error
 Executable              = $script
 Arguments               = $TASK $gpack
