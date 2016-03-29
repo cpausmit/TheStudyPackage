@@ -81,6 +81,13 @@ cat $BASEDIR/python/${GEN_PY}.py-template \
 
 executeCmd time cmsRun ${GEN_PY}.py
 
+if ! [ -e "${TASK}_${GPACK}_gen.root" ]
+then
+  echo " ERROR -- generation failed. No output file: ${TASK}_${GPACK}_gen.root"
+  echo "          EXIT now because there is no GEN file."
+  exit 1
+fi
+
 showDiskSpace
 
 ####################################################################################################
@@ -101,6 +108,13 @@ cat $BASEDIR/python/${SIM_PY}.py-template \
     > ${SIM_PY}.py
 
 executeCmd time cmsRun ${SIM_PY}.py
+
+if ! [ -e "${TASK}_${GPACK}_aodsim.root" ]
+then
+  echo " ERROR -- simulation failed. No output file: ${TASK}_${GPACK}_aodsim.root"
+  echo "          EXIT now because there is no AODSIM file."
+  exit 1
+fi
 
 showDiskSpace
 
@@ -125,6 +139,13 @@ cat $BASEDIR/python/${MIN_PY}.py-template \
     > ${MIN_PY}.py
 
 executeCmd time cmsRun ${MIN_PY}.py
+
+if ! [ -e "${TASK}_${GPACK}_miniaodsim.root" ]
+then
+  echo " ERROR -- miniaodsim failed. No output file: ${TASK}_${GPACK}_miniaodsim.root"
+  echo "          EXIT now because there is no MINIAODSIM file."
+  exit 1
+fi
 
 showDiskSpace
 
@@ -154,6 +175,13 @@ cat $BASEDIR/python/${BAM_PY}.py-template \
 executeCmd time cmsRun ${BAM_PY}.py
 # this is a little naming issue that has to be fixed
 mv ${TASK}_${GPACK}_bambu*  ${TASK}_${GPACK}_bambu.root
+
+if ! [ -e "${TASK}_${GPACK}_bambu.root" ]
+then
+  echo " ERROR -- bambu production failed. No output file: ${TASK}_${GPACK}_bambu.root"
+  echo "          EXIT now because there is no BAMBU file."
+  exit 1
+fi
 
 showDiskSpace
 
