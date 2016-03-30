@@ -3,6 +3,7 @@
 #
 # Submit the jobs to generate the MC we specify in the task.
 #
+#                                                                           v0 - March 2016 - C.Paus
 #===================================================================================================
 source ./bin/helpers.sh
 # Read the arguments
@@ -100,28 +101,8 @@ do
     continue
   fi
 
-  # not sustainable for mass jobs #
-  #outputFiles=${TASK}_${gpack}_bambu.root
+  # an emtpy tag to trigger a condor error (will be kept in HELD state)
   outputFiles=${TASK}_${gpack}.empty
-
-  ## # see whether the files are already there
-  ## complete=1
-  ## for output in `echo $outputFiles | tr ',' ' '`
-  ## do
-  ##   # test every required file for existence and non-null length
-  ##   size=0
-  ##   if [ -e "$OUTDIR/$TASK/$output" ]
-  ##   then
-  ##     size=`stat --printf="%s" $OUTDIR/$TASK/$output`
-  ##     #echo " Output: $output - $size"
-  ##   fi
-  ##   # break out of the loop of one file missing or incomplete
-  ##   if [ "$size" == "0" ]
-  ##   then
-  ##     complete=0
-  ##     break
-  ##   fi  
-  ## done
 
   exists=`grep ${TASK}_${gpack}_bambu.root /tmp/done.$$`
   complete=1
