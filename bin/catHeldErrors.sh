@@ -50,8 +50,13 @@ do
   siteConf=`grep 'Valid site-local-config not found' $errFile | head -1`
   #echo " -- frontier"
   frontier=`grep '\[frontier.c:1111\]: No more proxies' $errFile | head -1`
+  #echo " -- coral"
+  coral=`grep '::realloc failed ' $errFile` 
+  #echo " -- memory"
+  memory=`egrep 'std::bad_alloc exception was thrown.|cannot allocate memory' $errFile` 
   #echo " -- diskspace"
   space=`grep 'No space left on device' $errFile`
+  
 
   echo ""
   echo "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
@@ -61,6 +66,8 @@ do
   echo " xrootd:      $xrdFail"
   echo " siteconf:    $siteConf"
   echo " frontier:    $frontier"
+  echo " coral:       $coral"
+  echo " memory:      $memory"
   echo " space:       $space"
   echo "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
   if [ -z "$NLINES" ]

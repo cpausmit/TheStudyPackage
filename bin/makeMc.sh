@@ -228,7 +228,8 @@ fi
 
 # create the pickup output file for condor
 
-touch $BASEDIR/${TASK}_${GPACK}.empty
+echo " ---- D O N E ----" > $BASEDIR/${TASK}_${GPACK}.empty
+
 
 pwd
 ls -lhrt
