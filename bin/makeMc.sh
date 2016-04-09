@@ -8,7 +8,6 @@
 [ -d "./bin" ] || ( tar fzx default.tgz; rm default.tgz )          # make sure to cleanup right away
 export BASEDIR=`pwd`
 source ./bin/helpers.sh
-setupProxy
 
 # command line arguments
 TASK="$1"
@@ -195,7 +194,9 @@ ls -lhrt
 # define base output location
 REMOTE_SERVER="se01.cmsaf.mit.edu"
 REMOTE_BASE="srm/v2/server?SFN=/mnt/hadoop/cms/store"
-REMOTE_USER_DIR="/user/paus/study"
+REMOTE_USER_DIR="/user/paus/fastsm/043"
+
+sample=`echo $GPACK | sed 's/\(.*\)_nev.*/\1/'`
 
 # this is somewhat overkill but works very reliably, I suppose
 setupCmssw 7_6_3 cmscp.py
@@ -209,8 +210,8 @@ do
   executeCmd time ./cmscp.py \
     --middleware OSG --PNN $REMOTE_SERVER --se_name $REMOTE_SERVER \
     --inputFileList $pwd/${file} \
-    --destination srm://$REMOTE_SERVER:8443/${REMOTE_BASE}${REMOTE_USER_DIR}/${TASK} \
-    --for_lfn ${REMOTE_USER_DIR}/${TASK}
+    --destination srm://$REMOTE_SERVER:8443/${REMOTE_BASE}${REMOTE_USER_DIR}/${TASK}_${sample} \
+    --for_lfn ${REMOTE_USER_DIR}/${TASK}_${sample}
 done
 
 # make condor happy because it also might want some of the files
@@ -222,7 +223,7 @@ testBatch
 if [ "$?" == "1" ]
 then
   cd $BASEDIR
-  executeCmd rm -rf $WORKDIR *.root x509* \
+  executeCmd rm -rf $WORKDIR *.root \
                 bin/ config/ fromPhil/ fwlite/ generators/ html/ LICENSE  python/ README root/ tgz/
 fi
 

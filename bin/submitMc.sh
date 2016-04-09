@@ -55,16 +55,13 @@ mv      default.tgz $LOGDIR/$TASK
 # Set the script file
 script=$workDir/bin/makeMc.sh
 
-# Make sure there is a globus tickets available
-x509File=/tmp/x509up_u`id -u`
-
 # Make a record of completed jobs and directories
 glexec ls -1 $BASE/$CORE/${TASK}_* > /tmp/done.$$
 
 # Make the remote directory to hold our data for the long haul (need to analyze how many distinct
 # samples we are making)
 echo " Making all directories for the mass storage. This might take a while."
-for sample in `cat ./config/${TASK}.list|sed 's/\(.*\)_nev.*$/\1/'|sort -u`
+for sample in `cat ./config/${TASK}.list | sed 's/\(.*\)_nev.*$/\1/'|sort -u`
 do
   echo ""
   echo " New sample: $sample"
@@ -130,7 +127,7 @@ Requirements            = (isUndefined(IS_GLIDEIN) || OSGVO_OS_STRING == "RHEL 6
                           HasFileTransfer && \
                           CVMFS_cms_cern_ch_REVISION >= 21812 && \
                           Machine != "t3btch039.mit.edu" && Machine != "t3btch008.mit.edu"
-Request_Memory          = 2 GB
+Request_Memory          = 2.5 GB
 Request_Disk            = 5 GB
 Notification            = Error
 Executable              = $script
@@ -141,8 +138,9 @@ Input                   = /dev/null
 Output                  = $LOGDIR/${TASK}/${gpack}.lhe.out
 Error                   = $LOGDIR/${TASK}/${gpack}.lhe.err
 Log                     = $LOGDIR/${TASK}/${gpack}.lhe.log
-transfer_input_files    = $x509File,$LOGDIR/$TASK/default.tgz
+transfer_input_files    = $LOGDIR/$TASK/default.tgz
 Initialdir              = $OUTDIR/$TASK
+use_x509userproxy       = True
 transfer_output_files   = $outputFiles
 should_transfer_files   = YES
 when_to_transfer_output = ON_EXIT
