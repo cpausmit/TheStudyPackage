@@ -49,8 +49,10 @@ fi
 mkdir -p $LOGDIR/$TASK $OUTDIR/$TASK
 
 # Make main tar ball and save it for later
-tar fzc default.tgz bin/ config/ generators/ python/ root/ tgz/
-mv      default.tgz $LOGDIR/$TASK
+cp ~/.pycox.cfg ./
+tar fzc default.tgz .pycox.cfg bin/ config/ generators/ python/ root/ tgz/
+rm -f ./.pycox.cfg
+mv default.tgz $LOGDIR/$TASK
 
 # Set the script file
 script=$workDir/bin/makeMc.sh
@@ -125,8 +127,7 @@ Environment             = "HOSTNAME=$HOSTNAME"
 Requirements            = (isUndefined(IS_GLIDEIN) || OSGVO_OS_STRING == "RHEL 6") && \
                           Arch == "X86_64" && \
                           HasFileTransfer && \
-                          CVMFS_cms_cern_ch_REVISION >= 21812 && \
-                          Machine != "t3btch039.mit.edu" && Machine != "t3btch008.mit.edu"
+                          CVMFS_cms_cern_ch_REVISION > 21811
 Request_Memory          = 2.5 GB
 Request_Disk            = 5 GB
 Notification            = Error
@@ -144,6 +145,7 @@ use_x509userproxy       = True
 transfer_output_files   = $outputFiles
 should_transfer_files   = YES
 when_to_transfer_output = ON_EXIT
+on_exit_hold            = (ExitBySignal == True) || (ExitCode != 0)
 +AccountingGroup        = "group_cmsuser.$USER"
 +ProjectName            = "CpDarkMatterSimulation"
 Queue

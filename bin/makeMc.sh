@@ -185,7 +185,7 @@ fi
 showDiskSpace
 
 ####################################################################################################
-# push our files out to the Tier-2
+# push our files out to the Tier-2 / Dropbox
 ####################################################################################################
 cd $WORKDIR
 pwd
@@ -212,6 +212,26 @@ do
     --inputFileList $pwd/${file} \
     --destination srm://$REMOTE_SERVER:8443/${REMOTE_BASE}${REMOTE_USER_DIR}/${TASK}_${sample} \
     --for_lfn ${REMOTE_USER_DIR}/${TASK}_${sample}
+done
+
+tar fzx $BASEDIR/tgz/PyCox.tgz
+cd PyCox
+./install.sh
+cat setup.sh
+source setup.sh
+# put config in the default spot
+mv $BASEDIR/.pycox.cfg pycox.cfg
+cd -
+pwd=`pwd`
+
+# make sure directory exists
+executeCmd python ./PyCox/pycox.py --action mkdir \
+           --source /cms/store${REMOTE_USER_DIR}/${TASK}_${sample}
+for file in `echo ${TASK}_${GPACK}_bambu* ${TASK}_${GPACK}_miniaodsim*`
+do
+  # now do the copy
+  executeCmd python ./PyCox/pycox.py --action up --source $file \
+                        --target /cms/store${REMOTE_USER_DIR}/${TASK}_${sample}/${file}
 done
 
 # make condor happy because it also might want some of the files

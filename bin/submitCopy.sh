@@ -58,16 +58,14 @@ fi
 mkdir -p $LOGDIR/$TASK $OUTDIR/$TASK
 
 # Make main tar ball and save it for later
-tar fzc default.tgz bin/ config/ generators/ python/ root/ tgz/
-mv      default.tgz $LOGDIR/$TASK
-sleep 4
-tar fzt $LOGDIR/$TASK/default.tgz
+cp ~/.pycox.cfg ./
+tar fzc default.tgz .pycox.cfg bin/ config/ generators/ python/ root/ tgz/
+rm -f ./.pycox.cfg
+mv default.tgz $LOGDIR/$TASK
+sleep 3
 
 # Set the script file
 script=$workDir/bin/makeCopy.sh
-
-# Make sure there is a globus tickets available
-x509File=/tmp/x509up_u`id -u`
 
 # Make a record of ongoing jobs
 condor_q -global $USER -format "%s " Cmd -format "%s \n" Args | grep makeLhe > /tmp/condorQueue.$$
@@ -124,9 +122,10 @@ Universe                = vanilla
 Environment             = "HOSTNAME=$HOSTNAME"
 Requirements            = (isUndefined(IS_GLIDEIN) || OSGVO_OS_STRING == "RHEL 6") && \
                           Arch == "X86_64" && \
-                          Disk >= DiskUsage && (Memory * 1024) >= ImageSize && HasFileTransfer &&  \
-                          Disk >= (10000 * 1024) && \
-                          Machine != "t3btch039.mit.edu" && Machine != "t3btch008.mit.edu"
+                          HasFileTransfer && \
+                          CVMFS_cms_cern_ch_REVISION > 21811
+Request_Memory          = 1 GB
+Request_Disk            = 1 GB
 Notification            = Error
 Executable              = $script
 Arguments               = $TASK $gpack
@@ -136,11 +135,13 @@ Input                   = /dev/null
 Output                  = $LOGDIR/${TASK}/${gpack}.lhe.out
 Error                   = $LOGDIR/${TASK}/${gpack}.lhe.err
 Log                     = $LOGDIR/${TASK}/${gpack}.lhe.log
-transfer_input_files    = $x509File,$LOGDIR/$TASK/default.tgz
+transfer_input_files    = $LOGDIR/$TASK/default.tgz
 Initialdir              = $OUTDIR/$TASK
+use_x509userproxy       = True
 transfer_output_files   = $outputFiles
 should_transfer_files   = YES
 when_to_transfer_output = ON_EXIT
+on_exit_hold            = (ExitBySignal == True) || (ExitCode != 0)
 +AccountingGroup        = "group_cmsuser.$USER"
 +ProjectName            = "CpDarkMatterSimulation"
 Queue
