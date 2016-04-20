@@ -6,7 +6,7 @@
 #                                                                           v0 - March 2016 - C.Paus
 #===================================================================================================
 source ./bin/helpers.sh
-[ -z "$T2TOOLS_BASE" ] && source ~/T2Tools/setup.sh
+[ -z "$T2TOOLS_BASE" ] && source /home/cmsprod/T2Tools/setup.sh
 
 # Read the arguments
 echo " "
@@ -14,13 +14,13 @@ echo "Starting data processing with arguments:"
 echo "  --> $*"
 
 BASE=/mnt/hadoop/cms/store/user/paus
-CORE=fastsm/043
+CORE=filefi/043
 
 TASK=$1; OUTDIR=$2; LOGDIR=$3
 if [ "$#" -gt 3 ]
 then
   echo ""
-  echo -n "CLEANING up all potentially exiting output and log files. Are you sure? "
+  echo -n "CLEANING up all potentially existing output and log files. Are you sure? "
   read 
   CLEANUP=$4
 fi
@@ -52,34 +52,20 @@ mkdir -p $LOGDIR/$TASK $OUTDIR/$TASK
 
 # Make main tar ball and save it for later
 cp ~/.pycox.cfg ./
-tar fzc default.tgz .pycox.cfg bin/ config/ generators/ python/ root/ tgz/
+tar fzc default.tgz .pycox.cfg bin/ config/ python/ tgz/
 rm -f ./.pycox.cfg
 mv default.tgz $LOGDIR/$TASK
 
 # Set the script file
-script=$workDir/bin/makeMc.sh
+script=$workDir/bin/makeBambu.sh
 
 # Make a record of completed jobs and directories
-list $BASE/$CORE/${TASK}_* > /tmp/done.$$
+list $BASE/$CORE/$TASK > /tmp/done.$$
 
-## # Make the remote directory to hold our data for the long haul (need to analyze how many distinct
-## # samples we are making)
-## echo " Making all directories for the mass storage. This might take a while."
-## for sample in `cat ./config/${TASK}.list | sed 's/\(.*\)_nev.*$/\1/'|sort -u`
-## do
-##   echo ""
-##   echo " New sample: $sample"
-##   exists=`grep ${TASK}_${sample} /tmp/done.$$`
-##   echo "Exists: $exists --> ${TASK}_${sample} --> /tmp/done.$$"
-##   if [ "$exists" == "" ]
-##   then
-##     exeCmd rglexec "mkdir -p $BASE/$CORE/${TASK}_$sample; chmod a+rwx $BASE/$CORE/${TASK}_$sample"
-##   else
-##     echo " Directory already exists: $exists"
-##   fi
-## done
-## 
-## exit 0
+# Make the remote directory to hold our data for the long haul (need to analyze how many distinct
+# samples we are making)
+
+exeCmd rglexec "mkdir -p $BASE/$CORE/$TASK; chmod a+rwx $BASE/$CORE/$TASK"
 
 # Make a record of ongoing jobs
 condor_q -global $USER -format "%s " Cmd -format "%s \n" Args \
@@ -90,10 +76,15 @@ echo ""
 echo "# Submitting jobs to condor"
 echo ""
 
+# make sure the LFNs are all there
+./bin/prepareBambu.sh ${TASK}
+
 # loop over the relevant files
 nD=0; nQ=0; nS=0
-for gpack in `cat ./config/${TASK}.list`
+for lfn in `cat ./config/${TASK}.list`
 do
+
+  gpack=`echo $lfn | sed -e 's@^.*/@@' -e 's@.root$@@'`
 
   inQueue=`grep "$gpack" /tmp/condorQueue.$$`
   if [ "$inQueue" != "" ]
@@ -106,7 +97,7 @@ do
   # an emtpy tag to trigger a condor error (will be kept in HELD state)
   outputFiles=${TASK}_${gpack}.empty
 
-  exists=`grep ${TASK}_${gpack}_bambu.root /tmp/done.$$`
+  exists=`grep "$gpack" /tmp/done.$$`
   complete=1
   if [ "$exists" == "" ]
   then
@@ -127,21 +118,21 @@ do
 cat > submit.cmd <<EOF
 Universe                = vanilla
 Environment             = "HOSTNAME=$HOSTNAME"
-Requirements            = (isUndefined(IS_GLIDEIN) || OSGVO_OS_STRING == "RHEL 6") && \
-                          Arch == "X86_64" && \
-                          HasFileTransfer && \
-                          CVMFS_cms_cern_ch_REVISION > 21811
-Request_Memory          = 2.5 GB
-Request_Disk            = 5 GB
+Requirements            = (isUndefined(IS_GLIDEIN) || OSGVO_OS_STRING == "RHEL 6") \
+                          && Arch == "X86_64" \
+                          && HasFileTransfer
+#                          && CVMFS_cms_cern_ch_REVISION > 21811
+Request_Memory          = 2 GB
+Request_Disk            = 2 GB
 Notification            = Error
 Executable              = $script
 Arguments               = $TASK $gpack
 Rank                    = Mips
 GetEnv                  = False
 Input                   = /dev/null
-Output                  = $LOGDIR/${TASK}/${gpack}.lhe.out
-Error                   = $LOGDIR/${TASK}/${gpack}.lhe.err
-Log                     = $LOGDIR/${TASK}/${gpack}.lhe.log
+Output                  = $LOGDIR/${TASK}/${gpack}.out
+Error                   = $LOGDIR/${TASK}/${gpack}.err
+Log                     = $LOGDIR/${TASK}/${gpack}.log
 transfer_input_files    = $LOGDIR/$TASK/default.tgz
 Initialdir              = $OUTDIR/$TASK
 use_x509userproxy       = True
@@ -175,5 +166,8 @@ echo " =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 echo "  SUBMISSION SUMMARY -- nDone: $nD -- nQueued: $nQ -- nSubmitted: $nS"
 echo " =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
 echo ""
+
+# clearup
+rm -f done.$$ condorQueue.$$
 
 exit 0
