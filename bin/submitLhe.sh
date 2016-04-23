@@ -14,8 +14,8 @@ OUTDIR=$2
 LOGDIR=$3
 
 workDir=$PWD
-glexec mkdir -p    /mnt/hadoop/cms/store/user/paus/study/$TASK
-glexec chmod a+rwx /mnt/hadoop/cms/store/user/paus/study/$TASK
+makedir                  /mnt/hadoop/cms/store/user/paus/study/$TASK
+changmod --options=a+rwx /mnt/hadoop/cms/store/user/paus/study/$TASK
 
 # Prepare environment
 echo " "

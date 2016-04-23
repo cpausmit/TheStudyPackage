@@ -51,10 +51,18 @@ fi
 mkdir -p $LOGDIR/$TASK $OUTDIR/$TASK
 
 # Make main tar ball and save it for later
-cp ~/.pycox.cfg ./
-tar fzc default.tgz .pycox.cfg bin/ config/ python/ tgz/
-rm -f ./.pycox.cfg
-mv default.tgz $LOGDIR/$TASK
+# Make main tar ball and save it for later
+if ! [ -e "$LOGDIR/$TASK/default.tgz" ]
+then
+  cp ~/.pycox.cfg ./
+  tar fzc default.tgz .pycox.cfg bin/ config/ python/ tgz/
+  rm -f ./.pycox.cfg
+  mv default.tgz $LOGDIR/$TASK
+else
+  echo ""
+  echo -n " TAR ball already exists. Using the existing one. Ok? "
+  read
+fi
 
 # Set the script file
 script=$workDir/bin/makeBambu.sh
@@ -65,7 +73,8 @@ list $BASE/$CORE/$TASK > /tmp/done.$$
 # Make the remote directory to hold our data for the long haul (need to analyze how many distinct
 # samples we are making)
 
-exeCmd rglexec "mkdir -p $BASE/$CORE/$TASK; chmod a+rwx $BASE/$CORE/$TASK"
+exeCmd makedir                   $BASE/$CORE/$TASK
+exeCmd changemod --options=a+rwx $BASE/$CORE/$TASK
 
 # Make a record of ongoing jobs
 condor_q -global $USER -format "%s " Cmd -format "%s \n" Args \

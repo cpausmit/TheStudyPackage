@@ -202,10 +202,10 @@ sample=`echo $GPACK | sed 's/\(.*\)_nev.*/\1/'`
 setupCmssw 7_6_3 cmscp.py
 tar fzx $BASEDIR/tgz/copy.tgz
 pwd=`pwd`
+# always first show the proxy
+voms-proxy-info -all
 for file in `echo ${TASK}_${GPACK}_bambu* ${TASK}_${GPACK}_miniaodsim*`
 do
-  # always first show the proxy
-  voms-proxy-info -all
   # now do the copy
   executeCmd time ./cmscp.py \
     --middleware OSG --PNN $REMOTE_SERVER --se_name $REMOTE_SERVER \

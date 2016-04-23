@@ -51,10 +51,17 @@ fi
 mkdir -p $LOGDIR/$TASK $OUTDIR/$TASK
 
 # Make main tar ball and save it for later
-cp ~/.pycox.cfg ./
-tar fzc default.tgz .pycox.cfg bin/ config/ generators/ python/ root/ tgz/
-rm -f ./.pycox.cfg
-mv default.tgz $LOGDIR/$TASK
+if ! [ -e "$LOGDIR/$TASK/default.tgz" ]
+then
+  cp ~/.pycox.cfg ./
+  tar fzc default.tgz .pycox.cfg bin/ config/ generators/ python/ root/ tgz/
+  rm -f ./.pycox.cfg
+  mv default.tgz $LOGDIR/$TASK
+else
+  echo ""
+  echo -n " TAR ball already exists. Using the existing one. Ok? "
+  read
+fi
 
 # Set the script file
 script=$workDir/bin/makeMc.sh
@@ -62,24 +69,23 @@ script=$workDir/bin/makeMc.sh
 # Make a record of completed jobs and directories
 list $BASE/$CORE/${TASK}_* > /tmp/done.$$
 
-## # Make the remote directory to hold our data for the long haul (need to analyze how many distinct
-## # samples we are making)
-## echo " Making all directories for the mass storage. This might take a while."
-## for sample in `cat ./config/${TASK}.list | sed 's/\(.*\)_nev.*$/\1/'|sort -u`
-## do
-##   echo ""
-##   echo " New sample: $sample"
-##   exists=`grep ${TASK}_${sample} /tmp/done.$$`
-##   echo "Exists: $exists --> ${TASK}_${sample} --> /tmp/done.$$"
-##   if [ "$exists" == "" ]
-##   then
-##     exeCmd rglexec "mkdir -p $BASE/$CORE/${TASK}_$sample; chmod a+rwx $BASE/$CORE/${TASK}_$sample"
-##   else
-##     echo " Directory already exists: $exists"
-##   fi
-## done
-## 
-## exit 0
+## Make the remote directory to hold our data for the long haul (need to analyze how many distinct
+## samples we are making)
+#echo " Making all directories for the mass storage. This might take a while."
+#for sample in `cat ./config/${TASK}.list | sed 's/\(.*\)_nev.*$/\1/'|sort -u`
+#do
+#  echo ""
+#  echo " New sample: $sample"
+#  exists=`grep ${TASK}_${sample} /tmp/done.$$`
+#  echo "Exists: $exists --> ${TASK}_${sample} --> /tmp/done.$$"
+#  if [ "$exists" == "" ]
+#  then
+#    exeCmd makedir                   $BASE/$CORE/${TASK}_$sample
+#    exeCmd changemod --options=a+rwx $BASE/$CORE/${TASK}_$sample
+#  else
+#    echo " Directory already exists: $exists"
+#  fi
+#done
 
 # Make a record of ongoing jobs
 condor_q -global $USER -format "%s " Cmd -format "%s \n" Args \

@@ -28,12 +28,8 @@ fi
 workDir=$PWD
 
 # Make the remote directory to hold our data for the long haul
-#glexec mkdir -p    /mnt/hadoop/cms/store/user/paus/study/$TASK
-#glexec chmod a+rwx /mnt/hadoop/cms/store/user/paus/study/$TASK
-echo ssh $SERVER mkdir -p    ${USER_DIR}/$TASK
-ssh $SERVER mkdir -p         ${USER_DIR}/$TASK
-echo ssh $SERVER chmod a+rwx ${USER_DIR}/$TASK
-ssh $SERVER chmod a+rwx      ${USER_DIR}/$TASK
+makedir                      ${USER_DIR}/${TASK}
+changemod --options=a+rwx    ${USER_DIR}/${TASK}
 
 # Prepare environment
 echo " "

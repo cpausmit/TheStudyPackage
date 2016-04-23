@@ -42,12 +42,23 @@ cd $WORKDIR
 pwd
 ls -lhrt
 
-lfn=`grep $GPACK $BASEDIR/config/${TASK}.list`
-
-xrdcp root://cmsxrootd.fnal.gov/$lfn /tmp/$GPACK.root
-
+# setting up the software
 setupCmssw $BAM_CMSSW_VERSION $BAM_PY
 export PYTHONPATH="${PYTHONPATH}:$BASEDIR/python"
+
+# getting our input (important: xrdcp needs cvmfs to be setup)
+lfn=`grep $GPACK $BASEDIR/config/${TASK}.list`
+voms-proxy-info -all
+echo ""; echo " Make local copy of the root file with LFN: $lfn"
+executeCmd xrdcp -s root://cmsxrootd.fnal.gov/$lfn /tmp/$GPACK.root
+if [ -e "/tmp/$GPACK.root" ]
+then
+  ls -lhrt /tmp/$GPACK.root
+else
+  echo " ERROR -- input file file does not exist. Copy failed!"
+  echo "          EXIT now because there is no AOD* file to process."
+  exit 1
+fi
 
 # unpack the tar
 cd CMSSW_$BAM_CMSSW_VERSION
@@ -60,9 +71,14 @@ cat $BASEDIR/python/${BAM_PY}.py-template \
     | sed "s@XX-GPACK-XX@$GPACK@g" \
     > ${BAM_PY}.py
 
+# run bambu making
 executeCmd time cmsRun ${BAM_PY}.py
+
 # this is a little naming issue that has to be fixed
 mv bambu-output-file-tmp*.root  ${GPACK}_tmp.root
+
+# cleanup the input
+rm -f /tmp/$GPACK.root
 
 if ! [ -e "${GPACK}_tmp.root" ]
 then
@@ -76,6 +92,7 @@ showDiskSpace
 ####################################################################################################
 # push our files out to the Tier-2 / Dropbox
 ####################################################################################################
+
 cd $WORKDIR
 pwd
 ls -lhrt
