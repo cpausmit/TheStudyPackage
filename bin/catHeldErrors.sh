@@ -1,6 +1,13 @@
 #!/bin/bash
 #==================================================================================================
 NLINES="$1"
+if   [ -z "$NLINES" ]
+then
+  NLINES=20
+elif [ "$NLINES" == -1 ]
+then
+  NLINES=""
+fi
 
 cHeld="condor_q $USER -constraint HoldReasonCode!=0"
 holdReason=`$cHeld -format "%s\n" LastRemoteHost -format "%s\n\n" HoldReason`
