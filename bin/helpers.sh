@@ -214,3 +214,48 @@ function split {
     done
   done
 }
+
+function topUp {
+  # given raw list with for example 50000 events will be split up into NSEEDS pieces into split file
+
+  BASE="/cms/store/user/paus"
+  BOOK="fastsm/043"
+  SPLIT_FILE="$1"
+  TOPUP_FILE="$2"
+  SEED_OFFSET="$3"
+
+  rm -f $TOPUP_FILE
+  touch $TOPUP_FILE
+
+  lastSeed=`cat $SPLIT_FILE | sed 's@.*-@@' | sort -u | tail -1`
+  nSplit=$(($lastSeed - 999))
+  firstNewSeed=$(($lastSeed + $SEED_OFFSET))
+  nev=`head -1 $SPLIT_FILE | sed -e 's@.*_\(nev.*\)@\1@' -e 's@_seed.*@@'`
+  task=`basename $SPLIT_FILE`
+  task=`echo $task | cut -d \. -f 1`
+  echo " Task: $task -- Last seed: $lastSeed + offset: $SEED_OFFSET  ==>  $firstNewSeed (nev: $nev)"
+
+  for sample in `cat $SPLIT_FILE | sed 's@\(.*\)_nev.*.*@\1@' | sort -u`
+  do
+
+    echo "list $BASE/$BOOK/${task}_${sample}/\*_bambu.root"
+    
+    nCompleted=`list $BASE/$BOOK/${task}_${sample}/\*_bambu.root | wc -l`
+    echo " Sample completion: $nCompleted -> $nSplit"
+
+    if [ "$nCompleted" -lt "$nSplit" ]
+    then
+
+      # generate missing topup
+      seed=$firstNewSeed
+      while [ "$nCompleted" -lt "$nSplit" ]
+      do
+        echo "${sample}_${nev}_seed-${seed}"
+	echo "${sample}_${nev}_seed-${seed}" >> $TOPUP_FILE
+
+        seed=$(($seed + 1))
+        nCompleted=$(($nCompleted + 1))
+      done
+    fi
+  done
+}

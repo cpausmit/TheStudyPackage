@@ -16,7 +16,7 @@ echo "  --> $*"
 BASE=/mnt/hadoop/cms/store/user/paus
 CORE=fastsm/043
 
-TASK=$1; OUTDIR=$2; LOGDIR=$3
+TASK=`echo $1 | cut -d \. -f1`; LIST=`echo $1 | cut -d \. -f2`; OUTDIR=$2; LOGDIR=$3
 if [ "$#" -gt 3 ]
 then
   echo ""
@@ -72,7 +72,7 @@ list $BASE/$CORE/${TASK}_* > /tmp/done.$$
 ## Make the remote directory to hold our data for the long haul (need to analyze how many distinct
 ## samples we are making)
 #echo " Making all directories for the mass storage. This might take a while."
-#for sample in `cat ./config/${TASK}.list | sed 's/\(.*\)_nev.*$/\1/'|sort -u`
+#for sample in `cat ./config/${TASK}.${LIST} | sed 's/\(.*\)_nev.*$/\1/'|sort -u`
 #do
 #  echo ""
 #  echo " New sample: $sample"
@@ -98,7 +98,7 @@ echo ""
 
 # loop over the relevant files
 nD=0; nQ=0; nS=0
-for gpack in `cat ./config/${TASK}.list`
+for gpack in `cat ./config/${TASK}.${LIST}`
 do
 
   inQueue=`grep "$gpack" /tmp/condorQueue.$$`
