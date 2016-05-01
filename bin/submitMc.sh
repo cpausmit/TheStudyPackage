@@ -133,10 +133,11 @@ do
 cat > submit.cmd <<EOF
 Universe                = vanilla
 Environment             = "HOSTNAME=$HOSTNAME"
-Requirements            = (isUndefined(IS_GLIDEIN) || OSGVO_OS_STRING == "RHEL 6") && \
-                          Arch == "X86_64" && \
-                          HasFileTransfer && \
-                          CVMFS_cms_cern_ch_REVISION > 21811
+#Requirements            = (isUndefined(IS_GLIDEIN) || OSGVO_OS_STRING == "RHEL 6") && \
+Requirements            = ( ( isUndefined(TARGET.IS_GLIDEIN) && Arch == "X86_64" ) || \
+                            ( OSGVO_OS_STRING == "RHEL 6" && Arch == "X86_64" && \
+                              CVMFS_ams_cern_ch_REVISION >= 451 ) ) && \
+                          HasFileTransfer
 Request_Memory          = 2.5 GB
 Request_Disk            = 5 GB
 Notification            = Error
@@ -181,5 +182,8 @@ echo " =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 echo "  SUBMISSION SUMMARY -- nDone: $nD -- nQueued: $nQ -- nSubmitted: $nS"
 echo " =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
 echo ""
+
+# cleanup
+rm /tmp/done.$$ /tmp/condorQueue.$$
 
 exit 0
