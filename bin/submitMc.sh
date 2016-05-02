@@ -138,7 +138,7 @@ Requirements            = ( ( isUndefined(TARGET.IS_GLIDEIN) && Arch == "X86_64"
                             ( OSGVO_OS_STRING == "RHEL 6" && Arch == "X86_64" && \
                               CVMFS_ams_cern_ch_REVISION >= 451 ) ) && \
                           HasFileTransfer
-Request_Memory          = 2.5 GB
+Request_Memory          = 2.0 GB
 Request_Disk            = 5 GB
 Notification            = Error
 Executable              = $script
