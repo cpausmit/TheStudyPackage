@@ -51,9 +51,10 @@ fi
 mkdir -p $LOGDIR/$TASK $OUTDIR/$TASK
 
 # Make main tar ball and save it for later
-# Make main tar ball and save it for later
 if ! [ -e "$LOGDIR/$TASK/default.tgz" ]
 then
+  # make sure the LFNs are all there (this has to happen before the tar ball is made)
+  ./bin/prepareBambu.sh ${TASK}
   cp ~/.pycox.cfg ./
   tar fzc default.tgz .pycox.cfg bin/ config/ python/ tgz/
   rm -f ./.pycox.cfg
@@ -84,9 +85,6 @@ condor_q -global $USER -format "%s " Cmd -format "%s \n" Args \
 echo ""
 echo "# Submitting jobs to condor"
 echo ""
-
-# make sure the LFNs are all there
-./bin/prepareBambu.sh ${TASK}
 
 # loop over the relevant files
 nD=0; nQ=0; nS=0

@@ -16,6 +16,13 @@ GPACK="$2"
 # load all parameters relevant to this task
 echo " Initialize package"
 source $BASEDIR/config/bambu043.env
+# fine tuning for the python config ... data needs different config
+if [ "`echo $TASK | grep AOD$`" == "$TASK" ]
+then
+  # this is data
+  export BAM_PY=BambuData043
+  echo " Bambu python config is set to data: $BAM_PY"
+fi
 
 # make sure to contain file mess
 mkdir ./work
