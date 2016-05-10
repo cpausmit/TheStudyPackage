@@ -63,6 +63,9 @@ sleep 3
 # Set the script file
 script=$workDir/bin/makeCopy.sh
 
+# Get a new proxy
+newProxy
+
 # Make a record of ongoing jobs
 condor_q -global $USER -format "%s " Cmd -format "%s \n" Args | grep makeLhe > /tmp/condorQueue.$$
 

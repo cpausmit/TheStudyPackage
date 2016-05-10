@@ -6,7 +6,7 @@
 #                                                                           v0 - March 2016 - C.Paus
 #===================================================================================================
 source ./bin/helpers.sh
-[ -z "$T2TOOLS_BASE" ] && source ~/T2Tools/setup.sh
+[ -z "$T2TOOLS_BASE" ] && ( source ~/T2Tools/setup.sh )
 
 # Read the arguments
 echo " "
@@ -26,7 +26,7 @@ then
 fi
 
 # Define our work directory
-workDir=$PWD
+WORKDIR=$PWD
 
 # Prepare environment
 echo " "
@@ -53,8 +53,9 @@ mkdir -p $LOGDIR/$TASK $OUTDIR/$TASK
 # Make main tar ball and save it for later
 if ! [ -e "$LOGDIR/$TASK/default.tgz" ]
 then
+  source ./config/${TASK}.env
   cp ~/.pycox.cfg ./
-  tar fzc default.tgz .pycox.cfg bin/ config/ generators/ python/ root/ tgz/
+  tar fzc default.tgz .pycox.cfg bin/ config/${TASK}* generators/${GENERATOR}.tgz python/ tgz/
   rm -f ./.pycox.cfg
   mv default.tgz $LOGDIR/$TASK
 else
@@ -64,7 +65,10 @@ else
 fi
 
 # Set the script file
-script=$workDir/bin/makeMc.sh
+script=$WORKDIR/bin/makeMc.sh
+
+# Get a new proxy
+newProxy
 
 # Make a record of completed jobs and directories
 list $BASE/$CORE/${TASK}_* > /tmp/done.$$
@@ -101,7 +105,7 @@ nD=0; nQ=0; nS=0
 for gpack in `cat ./config/${TASK}.${LIST}`
 do
 
-  inQueue=`grep "$gpack" /tmp/condorQueue.$$`
+  inQueue=`grep "$gpack" /tmp/condorQueue.$$ | grep $TASK`
   if [ "$inQueue" != "" ]
   then
     echo " Queued: $gpack"
@@ -133,7 +137,6 @@ do
 cat > submit.cmd <<EOF
 Universe                = vanilla
 Environment             = "HOSTNAME=$HOSTNAME"
-#Requirements            = (isUndefined(IS_GLIDEIN) || OSGVO_OS_STRING == "RHEL 6") && \
 Requirements            = ( ( isUndefined(TARGET.IS_GLIDEIN) && Arch == "X86_64" ) || \
                             ( OSGVO_OS_STRING == "RHEL 6" && Arch == "X86_64" && \
                               CVMFS_ams_cern_ch_REVISION >= 451 ) ) && \
@@ -159,7 +162,6 @@ on_exit_hold            = (ExitBySignal == True) || (ExitCode != 0)
 +AccountingGroup        = "group_cmsuser.$USER"
 +ProjectName            = "CpDarkMatterSimulation"
 +DESIRED_Sites          = "T2_FR_GRIF_LLR,T3_US_Omaha,T2_CH_CERN_AI,T2_IT_Bari,T2_US_UCSD,T2_CH_CERN,T2_CH_CSCS,T2_UA_KIPT,T2_IN_TIFR,T2_FR_IPHC,T2_IT_Rome,T2_UK_London_Brunel,T2_EE_Estonia,T2_US_Florida,T2_US_Wisconsin,T2_HU_Budapest,T2_DE_RWTH,T2_BR_UERJ,T2_ES_IFCA,T2_DE_DESY,T2_US_Caltech,T2_TW_Taiwan,T0_CH_CERN,T1_RU_JINR_Disk,T2_UK_London_IC,T2_US_Nebraska,T2_ES_CIEMAT,T3_US_Princeton,T2_PK_NCP,T2_CH_CERN_T0,T3_US_FSU,T3_KR_UOS,T3_IT_Perugia,T3_US_Minnesota,T2_TR_METU,T2_AT_Vienna,T2_US_Purdue,T3_US_Rice,T3_HR_IRB,T2_BE_UCL,T3_US_FIT,T2_UK_SGrid_Bristol,T2_PT_NCG_Lisbon,T1_ES_PIC,T3_US_JHU,T2_IT_Legnaro,T2_RU_INR,T3_US_FIU,T3_EU_Parrot,T2_RU_JINR,T2_IT_Pisa,T3_UK_ScotGrid_GLA,T3_US_MIT,T2_CH_CERN_HLT,T2_MY_UPM_BIRUNI,T1_FR_CCIN2P3,T2_FR_GRIF_IRFU,T3_US_UMiss,T2_FR_CCIN2P3,T2_PL_Warsaw,T3_AS_Parrot,T2_US_MIT,T2_BE_IIHE,T2_RU_ITEP,T1_CH_CERN,T3_CH_PSI,T3_IT_Bologna"
-
 Queue
 EOF
 
@@ -173,7 +175,7 @@ EOF
     condor_submit submit.cmd
     exit 1
   fi
-  
+
   # it worked, so clean up
   rm submit.cmd
 

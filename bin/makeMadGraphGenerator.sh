@@ -48,9 +48,25 @@ cd models/
 sed 's:#.*$::g' $baseDir/config/${TASK}/template_extramodels.dat | while read model
 do
   echo Model: $model
-  wget --no-check-certificate $MG_SOURCE/$model
+  if [ -e "$baseDir/tgz/$model" ]
+  then
+    cp $baseDir/tgz/$model ./
+  else
+    ##wget --no-check-certificate $MG_SOURCE/$model
+    echo " MODEL NOT FOUND"
+  fi
   tar xzf $model
+  dir=`tar fzt $model | head -1`
   rm $model
+
+##  # fine tuning of the parameters
+##  if [ "$model" == "DMAxial_monow012j.tgz" ] 
+##  then
+##     # adjust model defaults -- irrelevant numbers for now
+##    cat $dir/parameters.py | sed -e 's@XX-MED-XX@10@' -e 's@XX-DM-XX@1@' > tmp.py
+##    mv tmp.py $dir/parameters.py
+##  fi
+##
 done
 cd -
 

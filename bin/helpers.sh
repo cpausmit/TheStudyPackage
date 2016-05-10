@@ -82,7 +82,7 @@ function iniState {
 function initialState {
   # provide a summary of where we are when we start the job
 
-  iniState
+  iniState $*
   echo ""
   echo " HOME:" ~/
   echo " "
@@ -130,6 +130,18 @@ function configureSite {
     # make sure this is the config to be used
     export CMS_PATH=`pwd`
   fi
+}
+
+function newProxy {
+  # get a new proxy
+
+  echo ""
+  echo "============================================================"
+  echo " Getting a new x509 proxy"
+  voms-proxy-init --valid 168:00 -voms cms
+  voms-proxy-info -all
+  echo "============================================================"
+  echo ""
 }
 
 function setupProxy {

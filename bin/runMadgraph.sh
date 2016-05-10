@@ -4,13 +4,16 @@
 # the given point and run the madgraph generator with it. Run scripts always start in the work
 # directory. The environment has to be setup before, this is the driver that does it.
 #
-# env: WORKDIR, MG_BASE
+# env: BASEDIR, WORKDIR
 #
 #                                                                        Ch.Paus (v0 - Mar 17, 2016)
 #---------------------------------------------------------------------------------------------------
 # read commend line parameters
 TASK="$1"
 GPACK="$2"
+
+# make sure madgraph is ready
+$BASEDIR/bin/setupMadgraph.sh $TASK $GPACK
 
 # find the base for madgraph program
 export MG_BASE=`echo MG5_*`
@@ -31,7 +34,27 @@ do
   value=`echo $param| cut -d'=' -f2`
   echo " par: $param --> tag: $tag / value: $value"
   sedString="$sedString -e s/XX-$tag-XX/$value/g"
+  #if   [ "$tag" == "MED" ]
+  #then
+  #  med=$value
+  #elif [ "$tag" == "DM" ]
+  #then
+  #  dm=$value
+  #fi
 done
+#
+## update width
+#if   [ "`echo $GENERATOR | grep axial`" != "" ]
+#then
+#  model=2
+#  width=`$BASEDIR/bin/width.py $model $med $dm | cut -d' ' -f2`
+#  sedString="$sedString -e s/XX-WIDTH-XX/$width/g"
+#elif [ "`echo $GENERATOR | grep vector`" != "" ]
+#then
+#  model=1
+#  width=`$BASEDIR/bin/width.py $model $med $dm | cut -d' ' -f2`
+#  sedString="$sedString -e s/XX-WIDTH-XX/$width/g"
+#fi
 
 # translate the template with sed
 echo " SED: $sedString"

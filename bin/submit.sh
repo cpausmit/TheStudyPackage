@@ -65,8 +65,8 @@ tar fzt $LOGDIR/$TASK/default.tgz
 # Set the script file
 script=$workDir/bin/runOne.sh
 
-# Make sure there is a globus tickets available
-x509File=/tmp/x509up_u`id -u`
+# Get a new proxy
+newProxy
 
 # Make a record of ongoing jobs
 condor_q -global $USER -format "%s " Cmd -format "%s \n" Args > /tmp/condorQueue.$$
@@ -157,6 +157,7 @@ Initialdir              = $OUTDIR/$TASK
 transfer_output_files   = $outputFiles
 should_transfer_files   = YES
 when_to_transfer_output = ON_EXIT
+use_x509userproxy       = True
 +AccountingGroup        = "group_cmsuser.$USER"
 Queue
 EOF

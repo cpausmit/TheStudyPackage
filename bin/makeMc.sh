@@ -4,14 +4,13 @@
 # Execute one job on the grid or interactively.
 #
 #===================================================================================================
+# command line arguments
+export TASK="$1"
+export GPACK="$2"
 # make sure we are locked and loaded
-[ -d "./bin" ] || ( tar fzx default.tgz; rm default.tgz )          # make sure to cleanup right away
+[ -d "./bin" ] || ( tar fzx default.tgz; rm default.tgz )        # make sure to cleanup right away
 export BASEDIR=`pwd`
 source ./bin/helpers.sh
-
-# command line arguments
-TASK="$1"
-GPACK="$2"
 
 # load all parameters relevant to this task
 echo " Initialize package"
@@ -53,6 +52,9 @@ then
 elif [ "$GENERATOR_TYPE" == "madgraph" ]
 then
   executeCmd time $BASEDIR/bin/runMadgraph.sh $TASK $GPACK
+elif [ "$GENERATOR_TYPE" == "jhu" ]
+then
+  executeCmd time $BASEDIR/bin/runJHU.sh $TASK $GPACK
 else
   echo " ERROR -- generator type is not known (\$GENERATOR_TYPE=$GENERATOR_TYPE)"
   echo "          EXIT now because there is no LHE file."
@@ -250,7 +252,6 @@ fi
 # create the pickup output file for condor
 
 echo " ---- D O N E ----" > $BASEDIR/${TASK}_${GPACK}.empty
-
 
 pwd
 ls -lhrt

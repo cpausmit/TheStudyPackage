@@ -68,6 +68,9 @@ fi
 # Set the script file
 script=$workDir/bin/makeBambu.sh
 
+# Get a new proxy
+newProxy
+
 # Make a record of completed jobs and directories
 list $BASE/$CORE/$TASK > /tmp/done.$$
 
@@ -130,7 +133,7 @@ Requirements            = (isUndefined(IS_GLIDEIN) || OSGVO_OS_STRING == "RHEL 6
                           && HasFileTransfer
 #                          && CVMFS_cms_cern_ch_REVISION > 21811
 Request_Memory          = 2 GB
-Request_Disk            = 2 GB
+Request_Disk            = 5 GB
 Notification            = Error
 Executable              = $script
 Arguments               = $TASK $gpack
