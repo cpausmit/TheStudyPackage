@@ -38,7 +38,7 @@ fi
 
 # go through the existing log files
 echo " Removing not needed log files."
-completionFiles=`ls -1 $OUTDIR/$TASK | grep empty`
+completionFiles=`ls -s1 $OUTDIR/$TASK | grep empty | grep -v ^0 | cut -d' ' -f2`
 cd $LOGDIR/$TASK
 for file in $completionFiles
 do
