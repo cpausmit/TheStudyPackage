@@ -1,7 +1,5 @@
 # ---------------------------------------------------------------------------------------------------
-# Basic script to take the customizecards for madgraph to be replaced with the specific values for
-# the given point and run the madgraph generator with it. Run scripts always start in the work
-# directory. The environment has to be setup before, this is the driver that does it.
+# Basic script to run the JHU geenrator.
 #
 # env: BASEDIR, WORKDIR
 #

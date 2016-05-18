@@ -28,13 +28,13 @@ process.source.inputCommands = cms.untracked.vstring(
 
 # determine the global tag to use
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff')
-process.GlobalTag.globaltag = '74X_dataRun2_Prompt_v4'
+process.GlobalTag.globaltag = '80X_mcRun2_asymptotic_2016_v3'
 
 # define meta data for this production
 process.configurationMetadata = cms.untracked.PSet(
   name       = cms.untracked.string('BambuProd'),
-  version    = cms.untracked.string('Mit_043'),
-  annotation = cms.untracked.string('AOD')
+  version    = cms.untracked.string('Mit_044'),
+  annotation = cms.untracked.string('AODSIM')
 )
 
 #>> standard sequences
@@ -75,11 +75,6 @@ process.load('MitEdm.Producers.conversionElectronsStable_cfi')
 #process.load('MitProd.TreeFiller.conversionProducer_cff')
 #addConversionFiller(MitTreeFiller)
 
-# Electron likelihood-based id
-from RecoEgamma.ElectronIdentification.ElectronMVAValueMapProducer_cfi import electronMVAValueMapProducer
-process.load('RecoEgamma.ElectronIdentification.ElectronMVAValueMapProducer_cfi')
-MitTreeFiller.Electrons.eIDLikelihoodName = 'electronMVAValueMapProducer:ElectronMVAEstimatorRun2Spring15Trig25nsV1Values'
-
 # Load basic particle flow collections
 # Used for rho calculation
 from CommonTools.ParticleFlow.goodOfflinePrimaryVertices_cfi import goodOfflinePrimaryVertices
@@ -108,11 +103,11 @@ process.load('MitProd.TreeFiller.PuppiSetup_cff')
 
 # recluster fat jets, btag subjets
 from MitProd.TreeFiller.utils.makeFatJets import initFatJets,makeFatJets
-pfbrecoSequence = initFatJets(process, isData = True)
-ak8chsSequence = makeFatJets(process, isData = True, algoLabel = 'AK', jetRadius = 0.8)
-ak8puppiSequence = makeFatJets(process, isData = True, algoLabel = 'AK', jetRadius = 0.8, pfCandidates = 'puppiNoLepPlusLep')
-ca15chsSequence = makeFatJets(process, isData = True, algoLabel = 'CA', jetRadius = 1.5)
-ca15puppiSequence = makeFatJets(process, isData = True, algoLabel = 'CA', jetRadius = 1.5, pfCandidates = 'puppiNoLepPlusLep')
+pfbrecoSequence = initFatJets(process, isData = False)
+ak8chsSequence = makeFatJets(process, isData = False, algoLabel = 'AK', jetRadius = 0.8)
+ak8puppiSequence = makeFatJets(process, isData = False, algoLabel = 'AK', jetRadius = 0.8, pfCandidates = 'puppiNoLepPlusLep')
+ca15chsSequence = makeFatJets(process, isData = False, algoLabel = 'CA', jetRadius = 1.5)
+ca15puppiSequence = makeFatJets(process, isData = False, algoLabel = 'CA', jetRadius = 1.5, pfCandidates = 'puppiNoLepPlusLep')
 
 # unload unwanted PAT stuff
 delattr(process, 'pfNoTauPFBRECOPFlow')
@@ -139,7 +134,7 @@ ak4PFJetsPuppi.doAreaFastjet = True
 #process.load('MitProd.TreeFiller.FastJetCorrection_cff')
 
 # Setup jet corrections
-process.load('JetMETCorrections.Configuration.JetCorrectionServices_cff')
+#process.load('JetMETCorrections.Configuration.JetCorrectionServices_cff')
 
 # Load btagging
 from MitProd.TreeFiller.utils.setupBTag import setupBTag
@@ -158,7 +153,6 @@ process.load('MitProd.TreeFiller.metFilters_cff')
 #> The bambu reco sequence
 recoSequence = cms.Sequence(
   electronsStable *
-  electronMVAValueMapProducer *
   #  conversionProducer *
   goodOfflinePrimaryVertices *
   particleFlowPtrs *
@@ -189,7 +183,17 @@ recoSequence = cms.Sequence(
 #
 #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
-# this is data, so nothing here
+# Import/Load genjets
+from RecoJets.Configuration.GenJetParticles_cff import genJetParticles
+process.load('RecoJets.Configuration.GenJetParticles_cff')
+from RecoJets.Configuration.RecoGenJets_cff import ak4GenJets, ak8GenJets
+process.load('RecoJets.Configuration.RecoGenJets_cff')
+
+genSequence = cms.Sequence(
+  genJetParticles *
+  ak4GenJets *
+  ak8GenJets
+)
 
 #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 #
@@ -201,13 +205,11 @@ recoSequence = cms.Sequence(
 
 # configure the filler
 MitTreeFiller.TreeWriter.fileName = 'bambu-output-file-tmp'
-# remove Monte Carlo information
-MitTreeFiller.MCEventInfo.active = False
-MitTreeFiller.MCParticles.active = False
-MitTreeFiller.MCVertexes.active = False
-MitTreeFiller.PileupInfo.active = False
-MitTreeFiller.AKT4GenJets.active = False
-MitTreeFiller.AKT8GenJets.active = False
+MitTreeFiller.PileupInfo.active = True
+MitTreeFiller.MCParticles.active = True
+MitTreeFiller.MCEventInfo.active = True
+MitTreeFiller.MCAllVertexes.active = True
+MitTreeFiller.Trigger.active = False
 
 # define fill bambu filler sequence
 
@@ -223,5 +225,6 @@ bambuFillerSequence = cms.Sequence(
 
 process.path = cms.Path(
   recoSequence *
+  genSequence *
   bambuFillerSequence
 )

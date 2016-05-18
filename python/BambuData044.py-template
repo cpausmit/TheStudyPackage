@@ -14,8 +14,9 @@ process.maxEvents = cms.untracked.PSet(
 #>> input source
 
 process.source = cms.Source(
-  "PoolSource",
-  fileNames = cms.untracked.vstring('file:XX-FILE_TRUNC-XX_aodsim.root')
+  #"PoolSource", fileNames = cms.untracked.vstring('root://cmsxrootd.fnal.gov/XX-LFN-XX')
+  #"PoolSource", fileNames = cms.untracked.vstring('root://xrootd-cms.infn.it/XX-LFN-XX')
+  "PoolSource", fileNames = cms.untracked.vstring('file:XX-GPACK-XX.root')
 )
 process.source.inputCommands = cms.untracked.vstring(
   "keep *",
@@ -27,13 +28,13 @@ process.source.inputCommands = cms.untracked.vstring(
 
 # determine the global tag to use
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff')
-process.GlobalTag.globaltag = 'MCRUN2_74_V9'
+process.GlobalTag.globaltag = '80X_mcRun2_asymptotic_2016_v3'
 
 # define meta data for this production
 process.configurationMetadata = cms.untracked.PSet(
   name       = cms.untracked.string('BambuProd'),
-  version    = cms.untracked.string('Mit_043'),
-  annotation = cms.untracked.string('AODSIM')
+  version    = cms.untracked.string('Mit_044'),
+  annotation = cms.untracked.string('AOD')
 )
 
 #>> standard sequences
@@ -74,11 +75,6 @@ process.load('MitEdm.Producers.conversionElectronsStable_cfi')
 #process.load('MitProd.TreeFiller.conversionProducer_cff')
 #addConversionFiller(MitTreeFiller)
 
-# Electron likelihood-based id
-from RecoEgamma.ElectronIdentification.ElectronMVAValueMapProducer_cfi import electronMVAValueMapProducer
-process.load('RecoEgamma.ElectronIdentification.ElectronMVAValueMapProducer_cfi')
-MitTreeFiller.Electrons.eIDLikelihoodName = 'electronMVAValueMapProducer:ElectronMVAEstimatorRun2Spring15Trig25nsV1Values'
-
 # Load basic particle flow collections
 # Used for rho calculation
 from CommonTools.ParticleFlow.goodOfflinePrimaryVertices_cfi import goodOfflinePrimaryVertices
@@ -106,12 +102,12 @@ from MitProd.TreeFiller.PuppiSetup_cff import puppiSequence
 process.load('MitProd.TreeFiller.PuppiSetup_cff')
 
 # recluster fat jets, btag subjets
-from MitProd.TreeFiller.utils.makeFatJets import initFatJets,makeFatJets
-pfbrecoSequence = initFatJets(process, isData = False)
-ak8chsSequence = makeFatJets(process, isData = False, algoLabel = 'AK', jetRadius = 0.8)
-ak8puppiSequence = makeFatJets(process, isData = False, algoLabel = 'AK', jetRadius = 0.8, pfCandidates = 'puppiNoLepPlusLep')
-ca15chsSequence = makeFatJets(process, isData = False, algoLabel = 'CA', jetRadius = 1.5)
-ca15puppiSequence = makeFatJets(process, isData = False, algoLabel = 'CA', jetRadius = 1.5, pfCandidates = 'puppiNoLepPlusLep')
+from MitProd.TreeFiller.utils.makeFatJets import initFatJets, makeFatJets
+pfbrecoSequence = initFatJets(process, isData = True)
+ak8chsSequence = makeFatJets(process, isData = True, algoLabel = 'AK', jetRadius = 0.8)
+ak8puppiSequence = makeFatJets(process, isData = True, algoLabel = 'AK', jetRadius = 0.8, pfCandidates = 'puppiNoLepPlusLep')
+ca15chsSequence = makeFatJets(process, isData = True, algoLabel = 'CA', jetRadius = 1.5)
+ca15puppiSequence = makeFatJets(process, isData = True, algoLabel = 'CA', jetRadius = 1.5, pfCandidates = 'puppiNoLepPlusLep')
 
 # unload unwanted PAT stuff
 delattr(process, 'pfNoTauPFBRECOPFlow')
@@ -133,13 +129,6 @@ process.load('RecoJets.JetProducers.ak4PFJetsPuppi_cfi')
 ak4PFJetsPuppi.src = cms.InputTag('puppiNoLepPlusLep')
 ak4PFJetsPuppi.doAreaFastjet = True
 
-# Load FastJet L1 corrections
-#from MitProd.TreeFiller.FastJetCorrection_cff import l1FastJetSequence
-#process.load('MitProd.TreeFiller.FastJetCorrection_cff')
-
-# Setup jet corrections
-process.load('JetMETCorrections.Configuration.JetCorrectionServices_cff')
-
 # Load btagging
 from MitProd.TreeFiller.utils.setupBTag import setupBTag
 ak4PFBTagSequence = setupBTag(process, 'ak4PFJets', 'AKt4PF')
@@ -157,8 +146,7 @@ process.load('MitProd.TreeFiller.metFilters_cff')
 #> The bambu reco sequence
 recoSequence = cms.Sequence(
   electronsStable *
-  electronMVAValueMapProducer *
-  #  conversionProducer *
+#  conversionProducer *
   goodOfflinePrimaryVertices *
   particleFlowPtrs *
   pfParticleSelectionSequence *
@@ -170,7 +158,6 @@ recoSequence = cms.Sequence(
   PFTau *
   puppiSequence *
   ak4PFJetsPuppi *
-#  l1FastJetSequence *
   ak4PFBTagSequence *
   ak4PFCHSBTagSequence *
   ak4PFPuppiBTagSequence *
@@ -178,8 +165,8 @@ recoSequence = cms.Sequence(
   ak8chsSequence*
   ak8puppiSequence*
   ca15chsSequence*
-  ca15puppiSequence
-#  metFilters
+  ca15puppiSequence*
+  metFilters
 )
 
 #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
@@ -188,17 +175,7 @@ recoSequence = cms.Sequence(
 #
 #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 
-# Import/Load genjets
-from RecoJets.Configuration.GenJetParticles_cff import genJetParticles
-process.load('RecoJets.Configuration.GenJetParticles_cff')
-from RecoJets.Configuration.RecoGenJets_cff import ak4GenJets, ak8GenJets
-process.load('RecoJets.Configuration.RecoGenJets_cff')
-
-genSequence = cms.Sequence(
-  genJetParticles *
-  ak4GenJets *
-  ak8GenJets
-)
+# this is data, so nothing here
 
 #-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
 #
@@ -209,35 +186,15 @@ genSequence = cms.Sequence(
 # remember the bambu sequence has been imported and loaded already in the beginning
 
 # configure the filler
-MitTreeFiller.TreeWriter.fileName = 'file:XX-FILE_TRUNC-XX_bambu'
-MitTreeFiller.PileupInfo.active = True
-MitTreeFiller.MCParticles.active = True
-MitTreeFiller.MCEventInfo.active = True
-MitTreeFiller.MCVertexes.active = True
-MitTreeFiller.Trigger.l1Active = False
-MitTreeFiller.EvtSelData.active = False
-MitTreeFiller.ConversionStepTracks.active = False
-MitTreeFiller.ConversionStepElectronsStable.active = False
-MitTreeFiller.PFCandidates.trackerTrackMapNames.remove('ConversionTracksMap')
-MitTreeFiller.HPSTaus.trackMapNames.remove('ConversionTracksMap')
-MitTreeFiller.StandaloneCosmicMuonTracks.active = False
-MitTreeFiller.GlobalCosmicMuonTracks.active = False
-MitTreeFiller.CosmicMuons.active = False
-MitTreeFiller.ConversionInOutTracks.active = False
-MitTreeFiller.ConversionInOutElectronsStable.active = False
-MitTreeFiller.ConversionOutInTracks.active = False
-MitTreeFiller.ConversionOutInElectronsStable.active = False
-MitTreeFiller.MergedElectronsStable.trackMapNames.remove('ConversionInOutTracksMap')
-MitTreeFiller.MergedElectronsStable.trackMapNames.remove('ConversionOutInTracksMap')
-MitTreeFiller.MergedConversions.stablePartMaps.remove('ConversionInOutElectronsStableTrackMap')
-MitTreeFiller.MergedConversions.stablePartMaps.remove('ConversionOutInElectronsStableTrackMap')
-MitTreeFiller.MergedConversions.stablePartMaps.remove('ElectronsStableConvStepTrackMap')
-MitTreeFiller.Conversions.stablePartMaps.remove('ConversionInOutElectronsStableTrackMap')
-MitTreeFiller.Conversions.stablePartMaps.remove('ConversionOutInElectronsStableTrackMap')
-MitTreeFiller.Conversions.stablePartMaps.remove('ElectronsStableConvStepTrackMap')
-MitTreeFiller.PFPhotonConversions.stablePartMaps.remove('ConversionInOutElectronsStableTrackMap')
-MitTreeFiller.PFPhotonConversions.stablePartMaps.remove('ConversionOutInElectronsStableTrackMap')
-MitTreeFiller.PFPhotonConversions.stablePartMaps.remove('ElectronsStableConvStepTrackMap')
+MitTreeFiller.TreeWriter.fileName = 'bambu-output-file-tmp'
+# remove Monte Carlo information
+MitTreeFiller.MCEventInfo.active = False
+MitTreeFiller.MCParticles.active = False
+MitTreeFiller.MCAllVertexes.active = False
+MitTreeFiller.PileupInfo.active = False
+MitTreeFiller.AKT4GenJets.active = False
+MitTreeFiller.AKT8GenJets.active = False
+MitTreeFiller.Trigger.active = False
 
 # define fill bambu filler sequence
 
@@ -253,6 +210,5 @@ bambuFillerSequence = cms.Sequence(
 
 process.path = cms.Path(
   recoSequence *
-  genSequence *
   bambuFillerSequence
 )

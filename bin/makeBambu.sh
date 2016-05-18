@@ -12,15 +12,16 @@ source ./bin/helpers.sh
 # command line arguments
 TASK="$1"
 GPACK="$2"
+CRAB="$3"
 
 # load all parameters relevant to this task
 echo " Initialize package"
-source $BASEDIR/config/bambu043.env
+source $BASEDIR/config/bambu044.env
 # fine tuning for the python config ... data needs different config
 if [ "`echo $TASK | grep AOD$`" == "$TASK" ]
 then
   # this is data
-  export BAM_PY=BambuData043
+  export BAM_PY=BambuData044
   echo " Bambu python config is set to data: $BAM_PY"
 fi
 
@@ -28,6 +29,9 @@ fi
 mkdir ./work
 cd    ./work
 export WORKDIR=`pwd`
+
+# this might be an issue with root
+export HOME=$WORKDIR
 
 # tell us the initial state
 initialState $*
@@ -57,10 +61,10 @@ export PYTHONPATH="${PYTHONPATH}:$BASEDIR/python"
 lfn=`grep $GPACK $BASEDIR/config/${TASK}.list`
 voms-proxy-info -all
 echo ""; echo " Make local copy of the root file with LFN: $lfn"
-executeCmd xrdcp -s root://cmsxrootd.fnal.gov/$lfn /tmp/$GPACK.root
-if [ -e "/tmp/$GPACK.root" ]
+executeCmd xrdcp -s root://cmsxrootd.fnal.gov/$lfn ./$GPACK.root
+if [ -e "./$GPACK.root" ]
 then
-  ls -lhrt /tmp/$GPACK.root
+  ls -lhrt ./$GPACK.root
 else
   echo " ERROR -- input file file does not exist. Copy failed!"
   echo "          EXIT now because there is no AOD* file to process."
@@ -69,7 +73,7 @@ fi
 
 # unpack the tar
 cd CMSSW_$BAM_CMSSW_VERSION
-executeCmd tar fzx $BASEDIR/tgz/bambu043.tgz
+executeCmd tar fzx $BASEDIR/tgz/bambu044.tgz
 cd $WORKDIR
 
 # prepare the python config from the given templates
@@ -85,7 +89,7 @@ executeCmd time cmsRun ${BAM_PY}.py
 mv bambu-output-file-tmp*.root  ${GPACK}_tmp.root
 
 # cleanup the input
-rm -f /tmp/$GPACK.root
+rm -f ./$GPACK.root
 
 if ! [ -e "${GPACK}_tmp.root" ]
 then
@@ -107,7 +111,7 @@ ls -lhrt
 # define base output location
 REMOTE_SERVER="se01.cmsaf.mit.edu"
 REMOTE_BASE="srm/v2/server?SFN=/mnt/hadoop/cms/store"
-REMOTE_USER_DIR="/user/paus/filefi/043"
+REMOTE_USER_DIR="/user/paus/filefi/044"
 
 sample=`echo $GPACK | sed 's/\(.*\)_nev.*/\1/'`
 
@@ -123,29 +127,29 @@ do
   executeCmd time ./cmscp.py \
     --middleware OSG --PNN $REMOTE_SERVER --se_name $REMOTE_SERVER \
     --inputFileList $pwd/${file} \
-    --destination srm://$REMOTE_SERVER:8443/${REMOTE_BASE}${REMOTE_USER_DIR}/${TASK} \
-    --for_lfn ${REMOTE_USER_DIR}/${TASK}
+    --destination srm://$REMOTE_SERVER:8443/${REMOTE_BASE}${REMOTE_USER_DIR}/${TASK}/${CRAB} \
+    --for_lfn ${REMOTE_USER_DIR}/${TASK}/${CRAB}
 done
 
-tar fzx $BASEDIR/tgz/PyCox.tgz
-cd PyCox
-./install.sh
-cat setup.sh
-source setup.sh
-# put config in the default spot
-mv $BASEDIR/.pycox.cfg pycox.cfg
-cd -
-pwd=`pwd`
-
-# make sure directory exists
-executeCmd python ./PyCox/pycox.py --action mkdir \
-           --source /cms/store${REMOTE_USER_DIR}/${TASK}
-for file in `echo ${GPACK}*`
-do
-  # now do the copy
-  executeCmd python ./PyCox/pycox.py --action up --source $file \
-                        --target /cms/store${REMOTE_USER_DIR}/${TASK}/${file}
-done
+#CP# tar fzx $BASEDIR/tgz/PyCox.tgz
+#CP# cd PyCox
+#CP# ./install.sh
+#CP# cat setup.sh
+#CP# source setup.sh
+#CP# # put config in the default spot
+#CP# mv $BASEDIR/.pycox.cfg pycox.cfg
+#CP# cd -
+#CP# pwd=`pwd`
+#CP# 
+#CP# # make sure directory exists
+#CP# executeCmd python ./PyCox/pycox.py --action mkdir \
+#CP#            --source /cms/store${REMOTE_USER_DIR}/${TASK}
+#CP# for file in `echo ${GPACK}*`
+#CP# do
+#CP#   # now do the copy
+#CP#   executeCmd python ./PyCox/pycox.py --action up --source $file \
+#CP#                         --target /cms/store${REMOTE_USER_DIR}/${TASK}/${file}
+#CP# done
 
 # make condor happy because it also might want some of the files
 executeCmd mv $WORKDIR/*.root $BASEDIR/

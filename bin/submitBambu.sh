@@ -14,15 +14,22 @@ echo "Starting data processing with arguments:"
 echo "  --> $*"
 
 BASE=/mnt/hadoop/cms/store/user/paus
-CORE=filefi/043
+CORE=filefi/044
+# python # dt = datetime.datetime.now()
+CRAB=crab_0_`date +%y%m%d-%H%M%S`
 
-TASK=$1; OUTDIR=$2; LOGDIR=$3
-if [ "$#" -gt 3 ]
+TASK=$1; OUTDIR=$2; LOGDIR=$3; CLEANUP=$4
+
+if   [ "$CLEANUP" == 'cleanup' ]
 then
   echo ""
-  echo -n "CLEANING up all potentially existing output and log files. Are you sure? "
+  echo -n " CLEANING up all potentially existing output and log files. Are you sure? "
   read 
-  CLEANUP=$4
+elif [ "$CLEANUP" == 'extend' ]
+then
+  echo ""
+  echo " EXTENDING existing workflow."
+  echo ""
 fi
 
 # Define our work directory
@@ -42,7 +49,7 @@ then
 fi
 
 # if we start from scratch, remove it all
-if [ "$CLEANUP" == "yes" ]
+if [ "$CLEANUP" == "cleanup" ]
 then
   rm -rf -rf $LOGDIR/$TASK $OUTDIR/$TASK
 fi
@@ -55,14 +62,19 @@ if ! [ -e "$LOGDIR/$TASK/default.tgz" ]
 then
   # make sure the LFNs are all there (this has to happen before the tar ball is made)
   ./bin/prepareBambu.sh ${TASK}
-  cp ~/.pycox.cfg ./
-  tar fzc default.tgz .pycox.cfg bin/ config/ python/ tgz/
-  rm -f ./.pycox.cfg
+  tar fzc default.tgz bin/ config/${TASK}* config/bambu* python/Bambu* tgz/bambu044.tgz tgz/copy.tgz tgz/siteconf.tgz
+  ## cp ~/.pycox.cfg ./
+  ##tar fzc default.tgz .pycox.cfg bin/ config/ python/ tgz/
+  ##rm -f ./.pycox.cfg
   mv default.tgz $LOGDIR/$TASK
 else
   echo ""
   echo -n " TAR ball already exists. Using the existing one. Ok? "
-  read
+  if [ "$CLEANUP" != "extend" ]
+  then
+    read
+  fi
+  echo ""
 fi
 
 # Set the script file
@@ -77,8 +89,8 @@ list $BASE/$CORE/$TASK > /tmp/done.$$
 # Make the remote directory to hold our data for the long haul (need to analyze how many distinct
 # samples we are making)
 
-exeCmd makedir                   $BASE/$CORE/$TASK
-exeCmd changemod --options=a+rwx $BASE/$CORE/$TASK
+exeCmd makedir                   $BASE/$CORE/$TASK/$CRAB
+exeCmd changemod --options=a+rwx $BASE/$CORE/$TASK/$CRAB
 
 # Make a record of ongoing jobs
 condor_q -global $USER -format "%s " Cmd -format "%s \n" Args \
@@ -128,7 +140,7 @@ do
 cat > submit.cmd <<EOF
 Universe                = vanilla
 Environment             = "HOSTNAME=$HOSTNAME"
-Requirements            = (isUndefined(IS_GLIDEIN) || OSGVO_OS_STRING == "RHEL 6") \
+Requirements            = (isUndefined(IS_GLIDEIN) || OSGVO_OS_STRING == "RHEL 6" || GLIDEIN_REQUIRED_OS == "rhel6") \
                           && Arch == "X86_64" \
                           && HasFileTransfer
 #                          && CVMFS_cms_cern_ch_REVISION > 21811
@@ -136,7 +148,7 @@ Request_Memory          = 2 GB
 Request_Disk            = 5 GB
 Notification            = Error
 Executable              = $script
-Arguments               = $TASK $gpack
+Arguments               = $TASK $gpack $CRAB
 Rank                    = Mips
 GetEnv                  = False
 Input                   = /dev/null
@@ -152,6 +164,7 @@ when_to_transfer_output = ON_EXIT
 on_exit_hold            = (ExitBySignal == True) || (ExitCode != 0)
 +AccountingGroup        = "group_cmsuser.$USER"
 +ProjectName            = "CpDarkMatterSimulation"
++DESIRED_Sites          = "T2_FR_GRIF_LLR,T3_US_Omaha,T2_CH_CERN_AI,T2_IT_Bari,T2_US_UCSD,T2_CH_CERN,T2_CH_CSCS,T2_UA_KIPT,T2_IN_TIFR,T2_FR_IPHC,T2_IT_Rome,T2_UK_London_Brunel,T2_EE_Estonia,T2_US_Florida,T2_US_Wisconsin,T2_HU_Budapest,T2_DE_RWTH,T2_BR_UERJ,T2_ES_IFCA,T2_DE_DESY,T2_US_Caltech,T2_TW_Taiwan,T0_CH_CERN,T1_RU_JINR_Disk,T2_UK_London_IC,T2_US_Nebraska,T2_ES_CIEMAT,T3_US_Princeton,T2_PK_NCP,T2_CH_CERN_T0,T3_US_FSU,T3_KR_UOS,T3_IT_Perugia,T3_US_Minnesota,T2_TR_METU,T2_AT_Vienna,T2_US_Purdue,T3_US_Rice,T3_HR_IRB,T2_BE_UCL,T3_US_FIT,T2_UK_SGrid_Bristol,T2_PT_NCG_Lisbon,T1_ES_PIC,T3_US_JHU,T2_IT_Legnaro,T2_RU_INR,T3_US_FIU,T3_EU_Parrot,T2_RU_JINR,T2_IT_Pisa,T3_UK_ScotGrid_GLA,T3_US_MIT,T2_CH_CERN_HLT,T2_MY_UPM_BIRUNI,T1_FR_CCIN2P3,T2_FR_GRIF_IRFU,T3_US_UMiss,T2_FR_CCIN2P3,T2_PL_Warsaw,T3_AS_Parrot,T2_US_MIT,T2_BE_IIHE,T2_RU_ITEP,T1_CH_CERN,T3_CH_PSI,T3_IT_Bologna"
 Queue
 EOF
 
@@ -177,7 +190,7 @@ echo "  SUBMISSION SUMMARY -- nDone: $nD -- nQueued: $nQ -- nSubmitted: $nS"
 echo " =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
 echo ""
 
-# clearup
-rm -f done.$$ condorQueue.$$
+# clean up
+rm -f /tmp/done.$$ /tmp/condorQueue.$$
 
 exit 0

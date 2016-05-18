@@ -101,6 +101,10 @@ function setupCmssw {
   echo "============================================================"
   echo " Initialize CMSSW $THIS_CMSSW_VERSION for $THIS_PY"
   source /cvmfs/cms.cern.ch/cmsset_default.sh
+  if [ "`echo $THIS_CMSSW_VERSION | grep ^8_`" != "" ]
+  then
+    export SCRAM_ARCH=slc6_amd64_gcc530
+  fi
   scram project CMSSW CMSSW_$THIS_CMSSW_VERSION
   cd CMSSW_$THIS_CMSSW_VERSION/src 
   eval `scram runtime -sh`
