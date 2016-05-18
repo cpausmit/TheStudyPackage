@@ -16,7 +16,7 @@ echo "  --> $*"
 BASE=/mnt/hadoop/cms/store/user/paus
 CORE=filefi/044
 # python # dt = datetime.datetime.now()
-CRAB=crab_0_`date +%y%m%d-%H%M%S`
+CRAB=crab_0_`date +%y%m%d_%H%M%S`
 
 TASK=$1; OUTDIR=$2; LOGDIR=$3; CLEANUP=$4
 
