@@ -34,27 +34,13 @@ do
   value=`echo $param| cut -d'=' -f2`
   echo " par: $param --> tag: $tag / value: $value"
   sedString="$sedString -e s/XX-$tag-XX/$value/g"
-  #if   [ "$tag" == "MED" ]
-  #then
-  #  med=$value
-  #elif [ "$tag" == "DM" ]
-  #then
-  #  dm=$value
-  #fi
 done
-#
-## update width
-#if   [ "`echo $GENERATOR | grep axial`" != "" ]
-#then
-#  model=2
-#  width=`$BASEDIR/bin/width.py $model $med $dm | cut -d' ' -f2`
-#  sedString="$sedString -e s/XX-WIDTH-XX/$width/g"
-#elif [ "`echo $GENERATOR | grep vector`" != "" ]
-#then
-#  model=1
-#  width=`$BASEDIR/bin/width.py $model $med $dm | cut -d' ' -f2`
-#  sedString="$sedString -e s/XX-WIDTH-XX/$width/g"
-#fi
+
+# customize
+if [ -e "$BASEDIR/config/$TASK/addTag" ]
+then
+  sedString="$sedString "`$BASEDIR/config/$TASK/addTag $GPACK`
+fi
 
 # translate the template with sed
 echo " SED: $sedString"
