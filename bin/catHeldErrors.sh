@@ -52,7 +52,7 @@ do
   #echo " -- location GI $outFile"
   glidein=`egrep 'GLIDEIN_SEs|GLIDEIN_ResourceName' $outFile|tr '\n' ',' | xargs`
   #echo " -- xrd"
-  xrdFail=`egrep 'Failed to open the file|\[ERROR\] Operation expired' $errFile|tr '\n' ','`
+  xrdFail=`egrep 'Failed to open the file|\[ERROR\] Operation expired|\[FATAL\] Redirect limit has been reached|\[ERROR\] Server responded with an error:' $errFile|tr '\n' ','`
   #echo " -- siteconf"
   siteConf=`grep 'Valid site-local-config not found' $errFile | head -1`
   #echo " -- frontier"
@@ -63,7 +63,10 @@ do
   memory=`egrep 'std::bad_alloc exception was thrown.|cannot allocate memory' $errFile` 
   #echo " -- diskspace"
   space=`grep 'No space left on device' $errFile`
-  
+  #echo " -- io error"
+  io=`grep 'Input/output error' $errFile`
+  #echo " -- cvmfs not available"
+  cvmfs=`grep '/cvmfs/cms.cern.ch/cmsset_default.sh: No such file or director' $errFile`
 
   echo ""
   echo "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
@@ -76,6 +79,8 @@ do
   echo " coral:       $coral"
   echo " memory:      $memory"
   echo " space:       $space"
+  echo " io:          $io"
+  echo " cvmfs:       $cvmfs"
   echo "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
   if [ -z "$NLINES" ]
   then

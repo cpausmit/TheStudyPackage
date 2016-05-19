@@ -84,7 +84,8 @@ script=$workDir/bin/makeBambu.sh
 newProxy
 
 # Make a record of completed jobs and directories
-list $BASE/$CORE/$TASK > /tmp/done.$$
+list $BASE/$CORE/$TASK         >  /tmp/done.$$
+list $BASE/$CORE/$TASK/crab_0* >> /tmp/done.$$
 
 # Make the remote directory to hold our data for the long haul (need to analyze how many distinct
 # samples we are making)
