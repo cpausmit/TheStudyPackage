@@ -54,7 +54,8 @@ if ! [ -e "$LOGDIR/$TASK/default.tgz" ]
 then
   source ./${VERSION}/${TASK}.env
   cp ~/.pycox.cfg ./
-  tar fzc default.tgz .pycox.cfg bin/ ${VERSION}/${TASK}* generators/${GENERATOR}.tgz ${VERSION}/python/ tgz/
+  tar fzc default.tgz .pycox.cfg tgz/ bin/ generators/${GENERATOR}.tgz \
+          ${VERSION}/python/ ${VERSION}/${TASK}* $VERSION/tgz/bambu${VERSION}.tgz
   rm -f ./.pycox.cfg
   mv default.tgz $LOGDIR/$TASK
 else
