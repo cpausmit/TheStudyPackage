@@ -1,0 +1,67 @@
+import FWCore.ParameterSet.Config as cms
+
+process = cms.Process('GEN')
+
+# import of standard configurations
+process.load('Configuration.StandardSequences.Services_cff')
+process.load('SimGeneral.HepPDTESSource.pythiapdt_cfi')
+process.load('FWCore.MessageService.MessageLogger_cfi')
+process.load('SimGeneral.MixingModule.mixNoPU_cfi')
+process.load('Configuration.StandardSequences.GeometryDB_cff')
+process.load('Configuration.StandardSequences.MagneticField_38T_cff')
+process.load('Configuration.StandardSequences.Generator_cff')
+process.load('XX-HADRONIZER-XX')
+process.load('IOMC.EventVertexGenerators.VtxSmearedRealistic7TeVCollision_cfi')
+process.load('GeneratorInterface.Core.genFilterSummary_cff')
+process.load('Configuration.StandardSequences.EndOfProcess_cff')
+process.load('Configuration.EventContent.EventContent_cff')
+
+process.maxEvents = cms.untracked.PSet(
+  input = cms.untracked.int32(-1)
+)
+
+# Input source
+process.source = cms.Source("LHESource",fileNames = cms.untracked.vstring('file:XX-FILE_TRUNC-XX.lhe')
+)
+
+process.options = cms.untracked.PSet(
+)
+
+# Production Info
+process.configurationMetadata = cms.untracked.PSet(
+  version = cms.untracked.string('$Revision: 1.0 $'),
+  annotation = cms.untracked.string('XX-HADRONIZER-XX. nevts:-1'),
+  name = cms.untracked.string('Tuning')
+)
+
+# Output definition
+
+process.RAWSIMoutput = cms.OutputModule("PoolOutputModule",
+  splitLevel = cms.untracked.int32(0),
+  eventAutoFlushCompressedSize = cms.untracked.int32(5242880),
+  outputCommands = process.RAWSIMEventContent.outputCommands,
+  fileName = cms.untracked.string('file:XX-FILE_TRUNC-XX_gen.root'),
+  dataset = cms.untracked.PSet(
+    filterName = cms.untracked.string(''),
+    dataTier = cms.untracked.string('GEN')
+  ),
+  SelectEvents = cms.untracked.PSet(
+    SelectEvents = cms.vstring('generation_step')
+  )
+)
+
+# Additional output definition
+
+# Other statements
+
+# Path and EndPath definitions
+process.generation_step = cms.Path(process.generator*process.pgen)
+process.genfiltersummary_step = cms.EndPath(process.genFilterSummary)
+process.endjob_step = cms.EndPath(process.endOfProcess)
+process.RAWSIMoutput_step = cms.EndPath(process.RAWSIMoutput)
+
+# Schedule definition
+process.schedule = cms.Schedule(process.generation_step,
+				process.genfiltersummary_step,
+				process.endjob_step,
+				process.RAWSIMoutput_step)

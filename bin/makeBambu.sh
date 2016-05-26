@@ -10,18 +10,19 @@ export BASEDIR=`pwd`
 source ./bin/helpers.sh
 
 # command line arguments
-TASK="$1"
-GPACK="$2"
-CRAB="$3"
+VERSION="$1"
+TASK="$2"
+GPACK="$3"
+CRAB="$4"
 
 # load all parameters relevant to this task
 echo " Initialize package"
-source $BASEDIR/config/bambu044.env
+source $BASEDIR/$VERSION/bambu.env
 # fine tuning for the python config ... data needs different config
 if [ "`echo $TASK | grep AOD$`" == "$TASK" ]
 then
   # this is data
-  export BAM_PY=BambuData044
+  export BAM_PY=BambuData
   echo " Bambu python config is set to data: $BAM_PY"
 fi
 
@@ -47,21 +48,22 @@ configureSite
 ####################################################################################################
 # initialize BAMBU
 ####################################################################################################
-# bambu step
-
-cd $WORKDIR
-pwd
-ls -lhrt
 
 # setting up the software
-setupCmssw $BAM_CMSSW_VERSION $BAM_PY
-export PYTHONPATH="${PYTHONPATH}:$BASEDIR/python"
+setupCmssw $BAM_CMSSW_VERSION empty
+# prepare the python config from the given templates
+cat $BASEDIR/$VERSION/python/${BAM_PY}.py-template \
+    | sed "s@XX-LFN-XX@$lfn@g" \
+    | sed "s@XX-GPACK-XX@$GPACK@g" \
+    > ${BAM_PY}.py
 
 # getting our input (important: xrdcp needs cvmfs to be setup)
-lfn=`grep $GPACK $BASEDIR/config/${TASK}.list`
+lfn=`grep $GPACK $BASEDIR/$VERSION/${TASK}.list`
 voms-proxy-info -all
-echo ""; echo " Make local copy of the root file with LFN: $lfn"
+echo ""
+echo " Make local copy of the root file with LFN: $lfn"
 executeCmd xrdcp -s root://cmsxrootd.fnal.gov/$lfn ./$GPACK.root
+
 if [ -e "./$GPACK.root" ]
 then
   ls -lhrt ./$GPACK.root
@@ -73,14 +75,8 @@ fi
 
 # unpack the tar
 cd CMSSW_$BAM_CMSSW_VERSION
-executeCmd tar fzx $BASEDIR/tgz/bambu044.tgz
+executeCmd tar fzx $BASEDIR/$VERSION/tgz/bambu${VERSION}.tgz
 cd $WORKDIR
-
-# prepare the python config from the given templates
-cat $BASEDIR/python/${BAM_PY}.py-template \
-    | sed "s@XX-LFN-XX@$lfn@g" \
-    | sed "s@XX-GPACK-XX@$GPACK@g" \
-    > ${BAM_PY}.py
 
 # run bambu making
 executeCmd time cmsRun ${BAM_PY}.py
@@ -111,7 +107,7 @@ ls -lhrt
 # define base output location
 REMOTE_SERVER="se01.cmsaf.mit.edu"
 REMOTE_BASE="srm/v2/server?SFN=/mnt/hadoop/cms/store"
-REMOTE_USER_DIR="/user/paus/filefi/044"
+REMOTE_USER_DIR="/user/paus/filefi/$VERSION"
 
 sample=`echo $GPACK | sed 's/\(.*\)_nev.*/\1/'`
 
@@ -131,26 +127,6 @@ do
     --for_lfn ${REMOTE_USER_DIR}/${TASK}/${CRAB}
 done
 
-#CP# tar fzx $BASEDIR/tgz/PyCox.tgz
-#CP# cd PyCox
-#CP# ./install.sh
-#CP# cat setup.sh
-#CP# source setup.sh
-#CP# # put config in the default spot
-#CP# mv $BASEDIR/.pycox.cfg pycox.cfg
-#CP# cd -
-#CP# pwd=`pwd`
-#CP# 
-#CP# # make sure directory exists
-#CP# executeCmd python ./PyCox/pycox.py --action mkdir \
-#CP#            --source /cms/store${REMOTE_USER_DIR}/${TASK}
-#CP# for file in `echo ${GPACK}*`
-#CP# do
-#CP#   # now do the copy
-#CP#   executeCmd python ./PyCox/pycox.py --action up --source $file \
-#CP#                         --target /cms/store${REMOTE_USER_DIR}/${TASK}/${file}
-#CP# done
-
 # make condor happy because it also might want some of the files
 executeCmd mv $WORKDIR/*.root $BASEDIR/
 
@@ -160,8 +136,7 @@ testBatch
 if [ "$?" == "1" ]
 then
   cd $BASEDIR
-  executeCmd rm -rf $WORKDIR *.root \
-                bin/ config/ fromPhil/ fwlite/ generators/ html/ LICENSE  python/ README root/ tgz/
+  executeCmd rm -rf $WORKDIR *.root bin/ $VERSION/ generators/ html/ tgz/
 fi
 
 # create the pickup output file for condor

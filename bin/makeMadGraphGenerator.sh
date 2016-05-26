@@ -15,7 +15,7 @@ MG_SOURCE=https://cms-project-generators.web.cern.ch/cms-project-generators/
 
 # command line arguments and corresponding environment
 TASK="$1"
-source ./config/${TASK}.env
+source ./$VERSION/${TASK}.env
 
 if ! [ -e "./work" ]
 then
@@ -45,7 +45,7 @@ cat config.$$
 
 # now we need to get all relevant models 
 cd models/
-sed 's:#.*$::g' $baseDir/config/${TASK}/template_extramodels.dat | while read model
+sed 's:#.*$::g' $baseDir/${VERSION}/${TASK}/template_extramodels.dat | while read model
 do
   echo Model: $model
   if [ -e "$baseDir/tgz/$model" ]
@@ -72,10 +72,10 @@ cd -
 
 # finally we build the generator
 cd $workDir
-./$MG_BASE/bin/mg5_aMC $baseDir/config/${TASK}/template_proc_card.dat
+./$MG_BASE/bin/mg5_aMC $baseDir/${VERSION}/${TASK}/template_proc_card.dat
 
 # copy our run card into the default location
-cp $baseDir/config/${TASK}/template_run_card.dat madgraph-generator/Cards/run_card.dat
+cp $baseDir/${VERSION}/${TASK}/template_run_card.dat madgraph-generator/Cards/run_card.dat
 
 # change the name to our task
 mv madgraph-generator madgraph-${TASK}

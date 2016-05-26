@@ -96,10 +96,14 @@ function setupCmssw {
 
   THIS_CMSSW_VERSION="$1"
   THIS_PY="$2"
-
   echo ""
   echo "============================================================"
   echo " Initialize CMSSW $THIS_CMSSW_VERSION for $THIS_PY"
+
+  cd $WORKDIR
+  pwd
+  ls -lhrt
+  
   source /cvmfs/cms.cern.ch/cmsset_default.sh
   if [ "`echo $THIS_CMSSW_VERSION | grep ^8_`" != "" ]
   then
@@ -108,8 +112,18 @@ function setupCmssw {
   scram project CMSSW CMSSW_$THIS_CMSSW_VERSION
   cd CMSSW_$THIS_CMSSW_VERSION/src 
   eval `scram runtime -sh`
-  export PYTHONPATH="${PYTHONPATH}:../python"
+  export PYTHONPATH="${PYTHONPATH}:$BASEDIR/$VERSION/python"
   cd -
+
+  # prepare the python config from the given template, if needed
+  if [ -e "$BASEDIR/$VERSION/python/${THIS_PY}.py-template" ]
+  then 
+    cat $BASEDIR/$VERSION/python/${THIS_PY}.py-template \
+        | sed "s@XX-HADRONIZER-XX@$HADRONIZER@g" \
+        | sed "s@XX-FILE_TRUNC-XX@${TASK}_${GPACK}@g" \
+        > ${THIS_PY}.py
+  fi
+
   echo "============================================================"
   echo ""
 }
@@ -215,8 +229,8 @@ function split {
 
   for line in `cat $FILE`
   do
-    core=`echo $line | sed 's/_nev-[0-9]*//'`
-    nTotal=`echo $line | sed 's/.*_nev-//'| sed 's/\([0-9]*\)_.*/\1/'`
+    core=`   echo $line | sed 's/_nev-[0-9]*//'`
+    nTotal=` echo $line | sed 's/.*_nev-//'| sed 's/\([0-9]*\)_.*/\1/'`
     nEvents=`echo $nTotal $NSEEDS | awk '{ print $1/$2 }'`
 
     echo " LINE: $line  -> $core  $nTotal  $nEvents"

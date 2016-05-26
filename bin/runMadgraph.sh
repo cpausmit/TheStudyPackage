@@ -22,7 +22,7 @@ export MG_BASE=`echo MG5_*`
 cd madgraph-${TASK}/bin
 
 # copy the customization template
-cp $BASEDIR/config/$TASK/template_customizecards.dat ./
+cp $BASEDIR/$VERSION/$TASK/template_customizecards.dat ./
 
 # generate all generator parameter settings from the GPACK string
 sedString=''
@@ -37,9 +37,9 @@ do
 done
 
 # customize
-if [ -e "$BASEDIR/config/$TASK/addTag" ]
+if [ -e "$BASEDIR/$VERSION/$TASK/addTag" ]
 then
-  sedString="$sedString "`$BASEDIR/config/$TASK/addTag $GPACK`
+  sedString="$sedString "`$BASEDIR/$VERSION/$TASK/addTag $GPACK`
 fi
 
 # translate the template with sed

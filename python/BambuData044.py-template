@@ -28,7 +28,7 @@ process.source.inputCommands = cms.untracked.vstring(
 
 # determine the global tag to use
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff')
-process.GlobalTag.globaltag = '80X_mcRun2_asymptotic_2016_v3'
+process.GlobalTag.globaltag = '80X_dataRun2_Prompt_v8'
 
 # define meta data for this production
 process.configurationMetadata = cms.untracked.PSet(
@@ -100,6 +100,26 @@ process.load('RecoParticleFlow.PFProducer.pfLinker_cff')
 # Load PUPPI
 from MitProd.TreeFiller.PuppiSetup_cff import puppiSequence
 process.load('MitProd.TreeFiller.PuppiSetup_cff')
+
+# add dummy PAT stuff
+process.tauMatchBoostedPFlow = cms.PSet()
+process.patTausBoostedPFlow = cms.PSet(
+    addGenMatch = cms.untracked.bool(False),
+    addGenJetMatch = cms.untracked.bool(False),
+    embedGenMatch = cms.untracked.bool(False),
+    embedGenJetMatch = cms.untracked.bool(False),
+    genParticleMatch = cms.untracked.string(''),
+    genJetMatch = cms.untracked.string('')
+)
+process.tauMatchBoosted = cms.PSet()
+process.patTausBoosted = cms.PSet(
+    addGenMatch = cms.untracked.bool(False),
+    addGenJetMatch = cms.untracked.bool(False),
+    embedGenMatch = cms.untracked.bool(False),
+    embedGenJetMatch = cms.untracked.bool(False),
+    genParticleMatch = cms.untracked.string(''),
+    genJetMatch = cms.untracked.string('')
+)
 
 # recluster fat jets, btag subjets
 from MitProd.TreeFiller.utils.makeFatJets import initFatJets, makeFatJets

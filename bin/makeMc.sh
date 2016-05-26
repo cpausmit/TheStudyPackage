@@ -46,7 +46,7 @@ executeCmd tar fzx $BASEDIR/generators/$GENERATOR.tgz
 # C H O O S E   T H E   G E N E R A T O R  [and run it]
 ####################################################################################################
 echo " INFO -- using generator type: $GENERATOR_TYPE"
-if [ "$GENERATOR_TYPE" == "powheg" ]
+if   [ "$GENERATOR_TYPE" == "powheg" ]
 then
   executeCmd time $BASEDIR/bin/runPowheg.sh $TASK $GPACK
 elif [ "$GENERATOR_TYPE" == "madgraph" ]

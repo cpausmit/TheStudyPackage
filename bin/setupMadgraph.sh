@@ -8,9 +8,10 @@
 #===================================================================================================
 TASK="$1"
 GPACK="$2"
+
 # make sure we are locked and loaded
 source $BASEDIR/bin/helpers.sh
-source $BASEDIR/config/${TASK}.env
+source $BASEDIR/$VERSION/${TASK}.env
 
 # generate all generator parameter settings from the GPACK string
 sedString=''
@@ -38,7 +39,7 @@ cat config.$$
 
 # now we need to get all relevant models 
 cd models/
-sed 's:#.*$::g' $BASEDIR/config/${TASK}/template_extramodels.dat | while read model
+sed 's:#.*$::g' $BASEDIR/$VERSION/${TASK}/template_extramodels.dat | while read model
 do
   echo Model: $model
   if [ -e "$BASEDIR/tgz/$model" ]
@@ -72,10 +73,10 @@ cd -
 
 # finally we build the generator
 cd $WORKDIR
-./$MG_BASE/bin/mg5_aMC $BASEDIR/config/${TASK}/template_proc_card.dat
+./$MG_BASE/bin/mg5_aMC $BASEDIR/$VERSION/${TASK}/template_proc_card.dat
 
 # copy our run card into the default location
-cp $BASEDIR/config/${TASK}/template_run_card.dat madgraph-generator/Cards/run_card.dat
+cp $BASEDIR/$VERSION/${TASK}/template_run_card.dat madgraph-generator/Cards/run_card.dat
 
 # change the name to our task
 mv madgraph-generator madgraph-${TASK}

@@ -5,7 +5,7 @@
 #
 #===================================================================================================
 source ./bin/helpers.sh
-[ -z "$T2TOOLS_BASE" ] && source ~/T2Tools/setup.sh
+[ -z "$T2TOOLS_BASE" ] && source ~/Work/T2Tools/setup.sh
 
 BASE=/mnt/hadoop/cms/store/user/paus
 CORE=filefi/044
@@ -25,25 +25,25 @@ fi
 WORKDIR=$PWD
 
 # Make sure we have the bambu tar ball
-if ! [ -e "$WORKDIR/tgz/bambu${version}.tgz" ]
+if ! [ -e "$WORKDIR/${version}/tgz/bambu${version}.tgz" ]
 then
   echo ""
   echo -n " Need to make latest bambu tarball ($WORKDIR/tgz/bambu${version}.tgz). Ok? [return for OK, Ctrl-C to stop] "
   read
   latest=`ls ~cmsprod/cms/cmssw/${version} |grep 'CMSSW'| tail -1`
   cd ~cmsprod/cms/cmssw/${version}/${latest}
-  echo " tar fzc $WORKDIR/tgz/bambu${version}.tgz lib/ python/ src/"
-  tar fzc $WORKDIR/tgz/bambu${version}.tgz lib/ python/ src/
+  echo " tar fzc $WORKDIR/$version/tgz/bambu${version}.tgz lib/ python/ src/"
+  tar fzc $WORKDIR/$version/tgz/bambu${version}.tgz lib/ python/ src/
   cd -
 fi
 
 # Get the configuration
-if ! [ -e "$WORKDIR/config/${TASK}.list" ]
+if ! [ -e "$WORKDIR/$version/${TASK}.list" ]
 then
   if [ -e "/home/cmsprod/cms/jobs/lfns/${TASK}.lfns" ]
   then
     cat /home/cmsprod/cms/jobs/lfns/${TASK}.lfns | tr -s ' ' | cut -d' ' -f2 \
-        > $WORKDIR/config/${TASK}.list
+        > $WORKDIR/$version/${TASK}.list
   else
     echo " ERROR - production does not have lfns"
     echo " > ~cmsprod/cms/jobs/lfns/"
@@ -52,7 +52,7 @@ then
   fi
 else
   echo " INFO - Config file exists already"
-  echo " > $WORKDIR/config/"
+  echo " > $WORKDIR/$version/"
   echo " > ${TASK}.list"
   echo ""
 fi

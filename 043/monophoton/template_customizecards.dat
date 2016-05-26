@@ -1,0 +1,12 @@
+done
+set run_card   nevents XX-NEV-XX
+set run_card   iseed   XX-SEED-XX
+set param_card mx      XX-DM-XX
+set param_card mzprime XX-MED-XX
+set param_card cV      XX-CV-XX
+set param_card cA      XX-CA-XX
+set param_card gdm     1
+set param_card gd      0.25
+set param_card gu      0.25
+compute_widths         1008
+done
