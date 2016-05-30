@@ -6,6 +6,7 @@
                   'xrdExpired': "[ERROR] Operation expired",
                   'xrdFatal': "[FATAL] Redirect limit has been reached",
 		  'xrdServer': "[ERROR] Server responded with an error:",
+		  'xrdSocket': "Source delayed close failed with error '[ERROR] Socket error:",
                   'siteConf': "Valid site-local-config not found",
                   'frontier': "[frontier.c:1111]: No more proxies",
                   'coral': "::realloc failed",

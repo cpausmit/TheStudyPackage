@@ -75,7 +75,7 @@ fi
 
 # unpack the tar
 cd CMSSW_$BAM_CMSSW_VERSION
-executeCmd tar fzx $BASEDIR/$VERSION/tgz/bambu${VERSION}.tgz
+executeCmd tar fzx $BASEDIR/$VERSION/tgz/bambu_${BAM_CMSSW_VERSION}.tgz
 cd $WORKDIR
 
 # run bambu making

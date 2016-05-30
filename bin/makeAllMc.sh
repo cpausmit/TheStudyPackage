@@ -194,7 +194,7 @@ setupCmssw $BAM_CMSSW_VERSION $BAM_PY
 
 # unpack the additional tar
 cd CMSSW_$BAM_CMSSW_VERSION
-executeCmd tar fzx $BASEDIR/$VERSION/tgz/bambu${VERSION}.tgz
+executeCmd tar fzx $BASEDIR/$VERSION/tgz/bambu_${BAM_CMSSW_VERSION}.tgz
 cd $WORKDIR
 
 executeCmd time cmsRun ${BAM_PY}.py

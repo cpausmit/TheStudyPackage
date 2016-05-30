@@ -158,7 +158,9 @@ transfer_output_files   = $outputFiles
 should_transfer_files   = YES
 when_to_transfer_output = ON_EXIT
 use_x509userproxy       = True
-+AccountingGroup        = "group_cmsuser.$USER"
++AccountingGroup        = "analysis.$USER"
++AcctGroup              = "analysis"
+## +AccountingGroup        = "group_cmsuser.$USER"
 Queue
 EOF
 

@@ -141,7 +141,9 @@ transfer_output_files   = $outputFiles
 should_transfer_files   = YES
 when_to_transfer_output = ON_EXIT
 on_exit_hold            = (ExitBySignal == True) || (ExitCode != 0)
-+AccountingGroup        = "group_cmsuser.$USER"
++AccountingGroup        = "analysis.$USER"
++AcctGroup              = "analysis"
+## +AccountingGroup        = "group_cmsuser.$USER"
 +ProjectName            = "CpDarkMatterSimulation"
 Queue
 EOF
