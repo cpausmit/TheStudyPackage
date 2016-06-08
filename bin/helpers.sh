@@ -238,7 +238,7 @@ function split {
     while [ $i -lt $NSEEDS ]
     do    
       seed=`echo $i | awk '{ print 1000+$1}'`
-      echo "${core}_nev-${nEvents}_seed-${seed}"
+      #echo "${core}_nev-${nEvents}_seed-${seed}"
       echo "${core}_nev-${nEvents}_seed-${seed}" >> $SPLIT_FILE
       let "i+=1"
     done

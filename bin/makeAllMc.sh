@@ -9,6 +9,7 @@ export CONFIG="$1"
 export VERSION="$2"
 export TASK="$3"
 export GPACK="$4"
+
 # make sure we are locked and loaded
 [ -d "./bin" ] || ( tar fzx default.tgz; rm default.tgz )        # make sure to cleanup right away
 export BASEDIR=`pwd`

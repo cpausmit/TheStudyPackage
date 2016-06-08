@@ -5,7 +5,7 @@
 #
 #===================================================================================================
 # make sure we are locked and loaded
-[ -d "./bin" ] || ( tar fzx default.tgz; rm default.tgz )          # make sure to cleanup right away
+[ -d "./bin" ] || ( tar fzx def.tgz; rm def.tgz )                  # make sure to cleanup right away
 export BASEDIR=`pwd`
 source ./bin/helpers.sh
 
@@ -13,7 +13,8 @@ source ./bin/helpers.sh
 VERSION="$1"
 TASK="$2"
 GPACK="$3"
-CRAB="$4"
+LFN="$4"
+CRAB="$5"
 
 # load all parameters relevant to this task
 echo " Initialize package"
@@ -58,11 +59,10 @@ cat $BASEDIR/$VERSION/python/${BAM_PY}.py-template \
     > ${BAM_PY}.py
 
 # getting our input (important: xrdcp needs cvmfs to be setup)
-lfn=`grep $GPACK $BASEDIR/$VERSION/${TASK}.list`
 voms-proxy-info -all
 echo ""
-echo " Make local copy of the root file with LFN: $lfn"
-executeCmd xrdcp -s root://cmsxrootd.fnal.gov/$lfn ./$GPACK.root
+echo " Make local copy of the root file with LFN: $LFN"
+executeCmd xrdcp -s root://cmsxrootd.fnal.gov/$LFN ./$GPACK.root
 
 if [ -e "./$GPACK.root" ]
 then

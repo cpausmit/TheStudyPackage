@@ -59,13 +59,13 @@ fi
 mkdir -p $LOGDIR/$TASK $OUTDIR/$TASK
 
 # Make main tar ball and save it for later
-if ! [ -e "$LOGDIR/$TASK/default.tgz" ]
+if ! [ -e "$LOGDIR/$TASK/def.tgz" ]
 then
   # make sure the LFNs are all there (this has to happen before the tar ball is made)
   ./bin/prepareBambu.sh ${VERSION} ${TASK}
-  tar fzc default.tgz bin/  tgz/copy.tgz tgz/siteconf.tgz \
+  tar fzc def.tgz bin/  tgz/copy.tgz tgz/siteconf.tgz \
           $VERSION/${TASK}* $VERSION/bambu* $VERSION/python/Bambu* $VERSION/tgz/bambu_${BAM_CMSSW_VERSION}.tgz
-  mv default.tgz $LOGDIR/$TASK
+  mv def.tgz $LOGDIR/$TASK
 else
   echo ""
   echo -n " TAR ball already exists. Using the existing one. Ok? "
@@ -100,6 +100,36 @@ condor_q -global $USER -format "%s " Cmd -format "%s \n" Args \
 echo ""
 echo "# Submitting jobs to condor"
 echo ""
+
+# Make the base submission file
+cat > submit.cmd.$$ <<EOF
+Universe                = vanilla
+Environment             = "HOSTNAME=$HOSTNAME"
+Requirements            = ( ( isUndefined(IS_GLIDEIN) ) \
+                            || ( OSGVO_OS_STRING == "RHEL 6" && CVMFS_cms_cern_ch_REVISION >= 21812 ) \
+                            || ( GLIDEIN_REQUIRED_OS == "rhel6" ) ) \
+                          && Arch == "X86_64" \
+                          && HasFileTransfer
+Request_Memory          = 2 GB
+Request_Disk            = 5 GB
+Notification            = Error
+Executable              = $script
+Rank                    = Mips
+GetEnv                  = False
+Input                   = /dev/null
+Log                     = $LOGDIR/${TASK}/${TASK}.log
+transfer_input_files    = $LOGDIR/$TASK/def.tgz
+Initialdir              = $OUTDIR/$TASK
+use_x509userproxy       = True
+should_transfer_files   = YES
+when_to_transfer_output = ON_EXIT
+on_exit_hold            = (ExitBySignal == True) || (ExitCode != 0)
++AccountingGroup        = "analysis.$USER"
++AcctGroup              = "analysis"
+## +AccountingGroup        = "group_cmsuser.$USER"
++ProjectName            = "CpDarkMatterSimulation"
++DESIRED_Sites          = "T2_FR_GRIF_LLR,T3_US_Omaha,T2_CH_CERN_AI,T2_IT_Bari,T2_US_UCSD,T2_CH_CERN,T2_CH_CSCS,T2_UA_KIPT,T2_IN_TIFR,T2_FR_IPHC,T2_IT_Rome,T2_UK_London_Brunel,T2_EE_Estonia,T2_US_Florida,T2_US_Wisconsin,T2_HU_Budapest,T2_DE_RWTH,T2_ES_IFCA,T2_DE_DESY,T2_US_Caltech,T2_TW_Taiwan,T0_CH_CERN,T1_RU_JINR_Disk,T2_UK_London_IC,T2_US_Nebraska,T2_ES_CIEMAT,T3_US_Princeton,T2_PK_NCP,T2_CH_CERN_T0,T3_US_FSU,T3_KR_UOS,T3_IT_Perugia,T3_US_Minnesota,T2_TR_METU,T2_AT_Vienna,T2_US_Purdue,T3_US_Rice,T3_HR_IRB,T2_BE_UCL,T3_US_FIT,T2_PT_NCG_Lisbon,T1_ES_PIC,T3_US_JHU,T2_IT_Legnaro,T2_RU_INR,T3_US_FIU,T3_EU_Parrot,T2_RU_JINR,T2_IT_Pisa,T3_UK_ScotGrid_GLA,T3_US_MIT,T2_CH_CERN_HLT,T2_MY_UPM_BIRUNI,T1_FR_CCIN2P3,T2_FR_GRIF_IRFU,T3_US_UMiss,T2_FR_CCIN2P3,T2_PL_Warsaw,T3_AS_Parrot,T2_US_MIT,T2_BE_IIHE,T2_RU_ITEP,T1_CH_CERN,T3_CH_PSI,T3_IT_Bologna"
+EOF
 
 # loop over the relevant files
 nD=0; nQ=0; nS=0
@@ -137,53 +167,11 @@ do
     continue
   fi
  
-cat > submit.cmd.$$ <<EOF
-Universe                = vanilla
-Environment             = "HOSTNAME=$HOSTNAME"
-Requirements            = (isUndefined(IS_GLIDEIN) || OSGVO_OS_STRING == "RHEL 6" || GLIDEIN_REQUIRED_OS == "rhel6") \
-                          && Arch == "X86_64" \
-                          && HasFileTransfer
-#                          && GLIDEIN_Site != "GridUNESP_CENTRAL"
-#                          && CVMFS_cms_cern_ch_REVISION > 21811
-Request_Memory          = 2 GB
-Request_Disk            = 5 GB
-Notification            = Error
-Executable              = $script
-Arguments               = $VERSION $TASK $gpack $CRAB
-Rank                    = Mips
-GetEnv                  = False
-Input                   = /dev/null
-Output                  = $LOGDIR/${TASK}/${gpack}.out
-Error                   = $LOGDIR/${TASK}/${gpack}.err
-Log                     = $LOGDIR/${TASK}/${gpack}.log
-transfer_input_files    = $LOGDIR/$TASK/default.tgz
-Initialdir              = $OUTDIR/$TASK
-use_x509userproxy       = True
-transfer_output_files   = $outputFiles
-should_transfer_files   = YES
-when_to_transfer_output = ON_EXIT
-on_exit_hold            = (ExitBySignal == True) || (ExitCode != 0)
-+AccountingGroup        = "analysis.$USER"
-+AcctGroup              = "analysis"
-## +AccountingGroup        = "group_cmsuser.$USER"
-+ProjectName            = "CpDarkMatterSimulation"
-+DESIRED_Sites          = "T2_FR_GRIF_LLR,T3_US_Omaha,T2_CH_CERN_AI,T2_IT_Bari,T2_US_UCSD,T2_CH_CERN,T2_CH_CSCS,T2_UA_KIPT,T2_IN_TIFR,T2_FR_IPHC,T2_IT_Rome,T2_UK_London_Brunel,T2_EE_Estonia,T2_US_Florida,T2_US_Wisconsin,T2_HU_Budapest,T2_DE_RWTH,T2_ES_IFCA,T2_DE_DESY,T2_US_Caltech,T2_TW_Taiwan,T0_CH_CERN,T1_RU_JINR_Disk,T2_UK_London_IC,T2_US_Nebraska,T2_ES_CIEMAT,T3_US_Princeton,T2_PK_NCP,T2_CH_CERN_T0,T3_US_FSU,T3_KR_UOS,T3_IT_Perugia,T3_US_Minnesota,T2_TR_METU,T2_AT_Vienna,T2_US_Purdue,T3_US_Rice,T3_HR_IRB,T2_BE_UCL,T3_US_FIT,T2_PT_NCG_Lisbon,T1_ES_PIC,T3_US_JHU,T2_IT_Legnaro,T2_RU_INR,T3_US_FIU,T3_EU_Parrot,T2_RU_JINR,T2_IT_Pisa,T3_UK_ScotGrid_GLA,T3_US_MIT,T2_CH_CERN_HLT,T2_MY_UPM_BIRUNI,T1_FR_CCIN2P3,T2_FR_GRIF_IRFU,T3_US_UMiss,T2_FR_CCIN2P3,T2_PL_Warsaw,T3_AS_Parrot,T2_US_MIT,T2_BE_IIHE,T2_RU_ITEP,T1_CH_CERN,T3_CH_PSI,T3_IT_Bologna"
-Queue
-EOF
-
-  #echo "condor_submit submit.cmd.$$ >& /dev/null"
-  condor_submit submit.cmd.$$ >& /dev/null
-  
-  # make sure it worked
-  if [ "$?" != "0" ]
-  then
-    # show what happened, exit with error and leave the submit file
-    condor_submit submit.cmd.$$
-    exit 1
-  fi
-  
-  # it worked, so clean up
-  rm submit.cmd.$$
+  echo "Arguments               = $VERSION $TASK $gpack $lfn $CRAB" >> submit.cmd.$$
+  echo "Output                  = $LOGDIR/${TASK}/${gpack}.out"	    >> submit.cmd.$$
+  echo "Error                   = $LOGDIR/${TASK}/${gpack}.err"	    >> submit.cmd.$$
+  echo "transfer_output_files   = $outputFiles"			    >> submit.cmd.$$
+  echo "Queue"                                                      >> submit.cmd.$$
 
 done
 
@@ -192,6 +180,19 @@ echo " =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 echo "  SUBMISSION SUMMARY -- nDone: $nD -- nQueued: $nQ -- nSubmitted: $nS"
 echo " =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
 echo ""
+
+condor_submit submit.cmd.$$
+
+# make sure it worked
+if [ "$?" != "0" ]
+then
+  # show what happened, exit with error and leave the submit file
+  condor_submit submit.cmd.$$
+  exit 1
+fi
+
+# it worked, so clean up
+rm submit.cmd.$$
 
 # clean up
 rm -f /tmp/done.$$ /tmp/condorQueue.$$

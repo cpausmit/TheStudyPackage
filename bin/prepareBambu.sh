@@ -25,7 +25,7 @@ then
 fi
 
 # find out the lastest CMSSW software release used in bambu
-latestCmssw=`ls -1 ~cmsprod/cms/cmssw/${VERSION}|grep 'CMSSW'|tail -1|sed 's@CMSSW_@@' 2>/dev/null`
+latestCmssw=`ls -1 ~cmsprod/cms/cmssw/${VERSION}  2>/dev/null |grep 'CMSSW'|tail -1|sed 's@CMSSW_@@'`
 
 # Define our work directory
 WORKDIR=$PWD
@@ -60,5 +60,6 @@ else
   #echo " INFO - Config file exists already"
   #echo " > $WORKDIR/$VERSION/"
   #echo " > ${TASK}.list"
+  echo " exists $TASK"
   echo -n ""
 fi

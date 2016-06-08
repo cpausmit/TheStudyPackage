@@ -56,7 +56,7 @@ then
   source ./${VERSION}/${TASK}.env
   cp ~/.pycox.cfg ./
   tar fzc default.tgz .pycox.cfg tgz/ bin/ generators/${GENERATOR}.tgz \
-          ${VERSION}/python/ ${VERSION}/${TASK}* $VERSION/tgz/bambu${BAM_CMSSW_VERSION}.tgz
+          ${VERSION}/python/ ${VERSION}/${TASK}* $VERSION/tgz/bambu_${BAM_CMSSW_VERSION}.tgz
   rm -f ./.pycox.cfg
   mv default.tgz $LOGDIR/$TASK
 else
@@ -135,14 +135,14 @@ do
     continue
   fi
  
-cat > submit.cmd <<EOF
+cat > submit.cmd.$$ <<EOF
 Universe                = vanilla
 Environment             = "HOSTNAME=$HOSTNAME"
-Requirements            = (isUndefined(IS_GLIDEIN) || OSGVO_OS_STRING == "RHEL 6" || GLIDEIN_REQUIRED_OS == "rhel6") \
+Requirements            = ( ( isUndefined(IS_GLIDEIN) ) \
+                            || ( OSGVO_OS_STRING == "RHEL 6" && CVMFS_cms_cern_ch_REVISION >= 21812 ) \
+                            || ( GLIDEIN_REQUIRED_OS == "rhel6" ) ) \
                           && Arch == "X86_64" \
                           && HasFileTransfer
-#                          && GLIDEIN_Site != "GridUNESP_CENTRAL"
-#                          && CVMFS_cms_cern_ch_REVISION > 21811
 Request_Memory          = 2.0 GB
 Request_Disk            = 5 GB
 Notification            = Error
@@ -169,19 +169,19 @@ on_exit_hold            = (ExitBySignal == True) || (ExitCode != 0)
 Queue
 EOF
 
-  #echo "condor_submit submit.cmd >& /dev/null"
-  condor_submit submit.cmd >& /dev/null
+  #echo "condor_submit submit.cmd.$$ >& /dev/null"
+  condor_submit submit.cmd.$$ >& /dev/null
   
   # make sure it worked
   if [ "$?" != "0" ]
   then
     # show what happened, exit with error and leave the submit file
-    condor_submit submit.cmd
+    condor_submit submit.cmd.$$
     exit 1
   fi
 
   # it worked, so clean up
-  rm submit.cmd
+  rm submit.cmd.$$
 
 done
 

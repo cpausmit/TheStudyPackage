@@ -38,6 +38,10 @@ for stub in files:
     se  = ''
     siteName = ''
 
+    if not os.path.exists(stub+'.out') or  not os.path.exists(stub+'.err'):
+        print ' Output/Error file not available: ' + stub
+        continue
+
     with open(stub+'.out',"r") as f:
         for line in f:
             for tag,value in outPatterns.iteritems():

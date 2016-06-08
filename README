@@ -45,3 +45,17 @@ Our version
 
   ./bin/generateCp.py  --med 2000 --dm 100 --proc 800 --gq 1.0 --nev 100
   ./bin/generateCp.py  --med 2000 --dm 100 --proc 801 --gq 1.0 --nev 100
+
+
+-- MonoTop grid
+
+  m_med = 1100, m_dm  100
+  m_med = 2200, m_dm  100
+  m_med = 2400, m_dm  100
+  m_med = 2700, m_dm  100
+  m_med = 3000, m_dm  100
+
+
+-- MonoZ grid to leptons
+
+  m_med = 200, m_dm = 10

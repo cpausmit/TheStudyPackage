@@ -214,7 +214,6 @@ MitTreeFiller.MCAllVertexes.active = False
 MitTreeFiller.PileupInfo.active = False
 MitTreeFiller.AKT4GenJets.active = False
 MitTreeFiller.AKT8GenJets.active = False
-MitTreeFiller.Trigger.active = False
 
 # define fill bambu filler sequence
 

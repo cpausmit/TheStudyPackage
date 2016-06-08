@@ -8,6 +8,7 @@ elif [ "$NLINES" == -1 ]
 then
   NLINES=""
 fi
+PATTERN="$2"
 
 cHeld="condor_q $USER -constraint HoldReasonCode!=0"
 holdReason=`$cHeld -format "%s\n" LastRemoteHost -format "%s\n\n" HoldReason`
@@ -28,8 +29,16 @@ do
   #echo "analyze: $error"
   clusterId=` echo $error | cut -d: -f1`
   errFile=`   echo $error | cut -d: -f2`
-  holdReason=`echo $error | cut -d: -f3-10`
 
+  if ! [ -z "$PATTERN" ]
+  then
+    if [ `echo $errFile | grep $PATTERN` != ''] 
+    then
+      continue    
+    fi
+  fi
+
+  holdReason=`echo $error | cut -d: -f3-10`
   outFile=`echo $errFile | sed "s@.err@.out@"`
   logFile=`echo $errFile | sed "s@.err@.log@"`
 
