@@ -182,6 +182,43 @@ function setupProxy {
   echo ""
 }
 
+function downloadFile {
+  # download a given lfn using xrootd
+
+  # read command line parameters
+  GPACK="$1"
+  LFN="$2"
+
+  serverList="cmsxrootd.fnal.gov cms-xrd-global.cern.ch xrootd.unl.edu"
+
+  echo ""
+  echo " Make local copy of the root file with LFN: $LFN"
+
+  for server in $serverList
+  do
+    echo " Trying server: $server"  
+
+    executeCmd xrdcp -d 1 -s root://$server/$LFN ./$GPACK.root
+
+    if [ -e "./$GPACK.root" ]
+    then
+      echo " Looks like copy worked on server: $server."
+      break
+    else
+      echo " ERROR -- input file ./$GPACK.root does not exist. Failed on server: $server"
+    fi
+  done
+
+  if [ -e "./$GPACK.root" ]
+  then
+    ls -lhrt ./$GPACK.root
+  else
+    echo " ERROR -- input file ./$GPACK.root does not exist. Failed on all servers: $serverList"
+    echo "          EXIT now because there is no AOD* file to process."
+    return
+  fi
+}  
+
 function tarMeUp {
   # tar up the present project but be careful
 

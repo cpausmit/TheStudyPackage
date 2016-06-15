@@ -111,7 +111,7 @@ else:
     print ' Done (%d)'%(len(sys.argv))
     sys.exit(0)
 
-cmd = "condor_q paus -constrain HoldReasonCode!=0 -format %s: clusterId -format %s\n Err"
+cmd = "condor_q paus -constrain HoldReasonCode!=0 -format %s: ClusterId -format %s: ProcId -format %s\n Err"
 list = cmd.split(" ")
 p = subprocess.Popen(list,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
 (out, err) = p.communicate()
@@ -126,9 +126,10 @@ for line in lines:
         continue
 
     clusterId = f[0]
-    stub = f[1]
+    procId = f[1]
+    stub = f[2]
 
-    cmd = ' rm ' + stub + ".*; condor_rm " + clusterId
+    cmd = ' rm ' + stub + ".*; condor_rm " + clusterId + "." + procId
     print cmd
     os.system(cmd)
     

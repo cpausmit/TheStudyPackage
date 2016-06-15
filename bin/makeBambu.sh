@@ -60,16 +60,9 @@ cat $BASEDIR/$VERSION/python/${BAM_PY}.py-template \
 
 # getting our input (important: xrdcp needs cvmfs to be setup)
 voms-proxy-info -all
-echo ""
-echo " Make local copy of the root file with LFN: $LFN"
-executeCmd xrdcp -s root://cmsxrootd.fnal.gov/$LFN ./$GPACK.root
-
-if [ -e "./$GPACK.root" ]
+downloadFile $GPACK $LFN
+if ! [ -e "./$GPACK.root" ]
 then
-  ls -lhrt ./$GPACK.root
-else
-  echo " ERROR -- input file file does not exist. Copy failed!"
-  echo "          EXIT now because there is no AOD* file to process."
   exit 1
 fi
 
@@ -142,7 +135,6 @@ fi
 # create the pickup output file for condor
 
 echo " ---- D O N E ----" > $BASEDIR/${TASK}_${GPACK}.empty
-
 
 pwd
 ls -lhrt

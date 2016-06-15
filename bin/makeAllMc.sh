@@ -5,15 +5,19 @@
 #
 #===================================================================================================
 # command line arguments
-export CONFIG="$1"
-export VERSION="$2"
-export TASK="$3"
-export GPACK="$4"
+CONFIG="$1"
+VERSION="$2"
+TASK="$3"
+GPACK="$4"
 
 # make sure we are locked and loaded
 [ -d "./bin" ] || ( tar fzx default.tgz; rm default.tgz )        # make sure to cleanup right away
-export BASEDIR=`pwd`
+BASEDIR=`pwd`
+export BASEDIR
 source ./bin/helpers.sh
+
+# tell us the initial state
+initialState $*
 
 # load all parameters relevant to this task
 echo " Initialize package"
@@ -26,9 +30,6 @@ export WORKDIR=`pwd`
 
 # this might be an issue with root
 export HOME=$WORKDIR
-
-# tell us the initial state
-initialState $*
 
 # make a working area
 echo " Start to work now"

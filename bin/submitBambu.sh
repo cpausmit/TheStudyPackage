@@ -7,7 +7,13 @@
 #===================================================================================================
 export BASEDIR=`pwd`
 source ./bin/helpers.sh
-[ -z "$T2TOOLS_BASE" ] && source /home/cmsprod/T2Tools/setup.sh
+if [ -z "$T2TOOLS_BASE" ]
+then
+  echo ""
+  echo " ERROR -- T2Tools are not setup try: source /home/cmsprod/T2Tools/setup.sh"
+  echo ""
+  exit 1
+fi
 
 # Read the arguments
 echo " "
@@ -58,7 +64,7 @@ fi
 # Make sure local directories (log and output) exist
 mkdir -p $LOGDIR/$TASK $OUTDIR/$TASK
 
-# Make main tar ball and save it for later
+# Make main tar ball, identify run script and save them for the jobs
 if ! [ -e "$LOGDIR/$TASK/def.tgz" ]
 then
   # make sure the LFNs are all there (this has to happen before the tar ball is made)
@@ -66,6 +72,7 @@ then
   tar fzc def.tgz bin/  tgz/copy.tgz tgz/siteconf.tgz \
           $VERSION/${TASK}* $VERSION/bambu* $VERSION/python/Bambu* $VERSION/tgz/bambu_${BAM_CMSSW_VERSION}.tgz
   mv def.tgz $LOGDIR/$TASK
+  cp $workDir/bin/makeBambu.sh $LOGDIR/$TASK
 else
   echo ""
   echo -n " TAR ball already exists. Using the existing one. Ok? "
@@ -77,7 +84,7 @@ else
 fi
 
 # Set the script file
-script=$workDir/bin/makeBambu.sh
+script=$LOGDIR/$TASK/makeBambu.sh
 
 # Get a new proxy
 newProxy
@@ -85,12 +92,6 @@ newProxy
 # Make a record of completed jobs and directories
 list $BASE/$CORE/$TASK         >  /tmp/done.$$
 list $BASE/$CORE/$TASK/crab_0* >> /tmp/done.$$
-
-# Make the remote directory to hold our data for the long haul (need to analyze how many distinct
-# samples we are making)
-
-exeCmd makedir                   $BASE/$CORE/$TASK/$CRAB
-exeCmd changemod --options=a+rwx $BASE/$CORE/$TASK/$CRAB
 
 # Make a record of ongoing jobs
 condor_q -global $USER -format "%s " Cmd -format "%s \n" Args \
@@ -175,12 +176,30 @@ do
 
 done
 
+# clean up
+rm -f /tmp/done.$$ /tmp/condorQueue.$$
+
 echo ""
 echo " =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
 echo "  SUBMISSION SUMMARY -- nDone: $nD -- nQueued: $nQ -- nSubmitted: $nS"
 echo " =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
 echo ""
 
+if [ "$nS" == "0" ]
+then
+  echo " INFO -- no jobs to submit. EXIT"
+  echo ""
+  rm submit.cmd.$$
+  exit 0
+fi
+
+# Make the remote directory to hold our data for the long haul (need to analyze how many distinct
+# samples we are making)
+
+exeCmd makedir                   $BASE/$CORE/$TASK/$CRAB
+exeCmd changemod --options=a+rwx $BASE/$CORE/$TASK/$CRAB
+
+# Now submit the job
 condor_submit submit.cmd.$$
 
 # make sure it worked
@@ -193,8 +212,5 @@ fi
 
 # it worked, so clean up
 rm submit.cmd.$$
-
-# clean up
-rm -f /tmp/done.$$ /tmp/condorQueue.$$
 
 exit 0
