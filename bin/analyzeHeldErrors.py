@@ -22,7 +22,7 @@ for tag,value in errPatterns.iteritems():
     errCounts[tag] = 0
     errValues[tag] = ''
 
-cmd = "condor_q paus -constrain HoldReasonCode!=0 -format %s\n Err"
+cmd = "condor_q $USER -constrain HoldReasonCode!=0 -format %s\n Err"
 list = cmd.split(" ")
 p = subprocess.Popen(list,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
 (out, err) = p.communicate()
@@ -111,7 +111,7 @@ else:
     print ' Done (%d)'%(len(sys.argv))
     sys.exit(0)
 
-cmd = "condor_q paus -constrain HoldReasonCode!=0 -format %s: ClusterId -format %s: ProcId -format %s\n Err"
+cmd = "condor_q $USER -constrain HoldReasonCode!=0 -format %s: ClusterId -format %s: ProcId -format %s\n Err"
 list = cmd.split(" ")
 p = subprocess.Popen(list,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
 (out, err) = p.communicate()
