@@ -25,7 +25,6 @@ def findHeldJobStubs(debug=0):
     stubs = out.split(":") 
 
     return stubs
-  
 
 def readPatterns(debug=0):
     # read the patterns to search for in error and output files
@@ -41,12 +40,12 @@ def readPatterns(debug=0):
     oPs = data['outPatterns']
     ePs = data['errPatterns']
 
-
     return (oPs, ePs)
 
 #---------------------------------------------------------------------------------------------------
 #                                         M A I N
 #---------------------------------------------------------------------------------------------------
+
 # general parameters
 debug = 0
 
@@ -177,4 +176,3 @@ for line in lines:
     cmd = ' rm ' + stub + ".*; condor_rm " + clusterId + "." + procId
     print cmd
     os.system(cmd)
-    
