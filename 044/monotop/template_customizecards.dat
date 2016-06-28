@@ -15,5 +15,5 @@ set param_card mass  9000003 1.000000E+02
 set param_card mass  9000004 XX-MED-XX
 set param_card decay 9000003 0.000000E+00
 #set param_card decay 9000004 XX-WIDTH-XX
-compute_widths        9000004
+compute_widths       9000004
 done

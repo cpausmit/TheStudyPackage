@@ -25,6 +25,14 @@ do
   sedString="$sedString -e s/XX-$tag-XX/$value/g"
 done
 
+# add tags as needed for this model
+if [ -e "$BASEDIR/$VERSION/${TASK}/addTags" ]
+then
+  additionalPars=`$BASEDIR/$VERSION/${TASK}/addTags $GPACK`
+  echo " ADDITIONAL PARAMETERS: $additionalPars"
+  sedString="$sedString $additionalPars"
+fi
+
 # start madgraph business
 export MG_BASE=`echo MG5_*`
 cd $MG_BASE
@@ -56,6 +64,7 @@ do
   # fine tuning of the parameters
   if [ -e "$dir/parameters.py" ]
   then
+    echo "  !!!! ADJUSTING !!!!  "
     # adjust model defaults -- irrelevant numbers for now
     echo " cat $dir/parameters.py | sed $sedString > tmp.py "
     cat $dir/parameters.py | sed $sedString > tmp.py

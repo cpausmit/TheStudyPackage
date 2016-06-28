@@ -2,46 +2,92 @@
 #==================================================================================================
 import os,sys,subprocess
 
-with open("./config/heldErrors.db","r") as f:
-    input = f.read()
-    data = eval(input)
+def findHeldJobStubs(debug=0):
+    # find all job file stubs (without .err/.out extensions) to analyze
 
-outPatterns = data['outPatterns']
-errPatterns = data['errPatterns']
+    cmd = "condor_q " + os.getenv('USER') + " -constrain HoldReasonCode!=0 -format %s: Err"
+    list = cmd.split(" ")
+    
+    if debug > 0:
+        print " CMD: " + cmd
+        print list
+    
+    p = subprocess.Popen(list,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+    (out, err) = p.communicate()
+    rc = p.returncode
+    
+    if debug > 0:
+        print "\n\n RC : " + str(rc)
+        print "\n\n OUT: " + out
+        print "\n\n ERR: " + err
+    
+    out = out.replace('.err','')
+    stubs = out.split(":") 
 
+    return stubs
+  
+
+def readPatterns(debug=0):
+    # read the patterns to search for in error and output files
+
+    with open("./config/heldErrors.db","r") as f:
+        input = f.read()
+        data = eval(input)
+    
+    if debug > 0:
+        print " PATTERNS: "
+        print data
+
+    oPs = data['outPatterns']
+    ePs = data['errPatterns']
+
+
+    return (oPs, ePs)
+
+#---------------------------------------------------------------------------------------------------
+#                                         M A I N
+#---------------------------------------------------------------------------------------------------
+# general parameters
+debug = 0
+
+# get the patterns to look for
+(outPatterns, errPatterns) = readPatterns(debug)
+
+# keep track of sites showing errors
 nErrsSites = {}
+
+# keep track of output file patterns
 outCounts = {}
 outValues = {}
 for tag,value in outPatterns.iteritems():
     outCounts[tag] = 0
     outValues[tag] = ''
 
+# keep track of error file patterns
 errCounts = {}
 errValues = {}
 for tag,value in errPatterns.iteritems():
     errCounts[tag] = 0
     errValues[tag] = ''
 
-cmd = "condor_q $USER -constrain HoldReasonCode!=0 -format %s\n Err"
-list = cmd.split(" ")
-p = subprocess.Popen(list,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
-(out, err) = p.communicate()
-rc = p.returncode
+# get the job file stubs to analyze
+stubs = findHeldJobStubs(debug)
 
-out = out.replace('.err','')
-files = out.split("\n") 
-for stub in files:
-    
+# loop through the job stubs
+for stub in stubs:
+
     if stub == '':
         continue
 
-    se  = ''
-    siteName = ''
+    se  = 'undefined'
+    siteName = 'undefined'
 
     if not os.path.exists(stub+'.out') or  not os.path.exists(stub+'.err'):
         print ' Output/Error file not available: ' + stub
         continue
 
+    if debug > 1:
+        print " Open: %s"%(stub+'.out')
     with open(stub+'.out',"r") as f:
         for line in f:
             for tag,value in outPatterns.iteritems():
@@ -52,13 +98,10 @@ for stub in files:
                     if tag == 'glidein':
                         siteName = line.replace('\n','')                       
                         siteName = siteName.replace('GLIDEIN_ResourceName=','')
-
-    if siteName == '':
-        siteName = se
-        continue
-
  
     lError = False
+    if debug > 1:
+        print " Open: %s"%(stub+'.err')
     with open(stub+'.err',"r") as f:
         for line in f:
             for tag,value in errPatterns.iteritems():
@@ -111,7 +154,8 @@ else:
     print ' Done (%d)'%(len(sys.argv))
     sys.exit(0)
 
-cmd = "condor_q $USER -constrain HoldReasonCode!=0 -format %s: ClusterId -format %s: ProcId -format %s\n Err"
+cmd = "condor_q " + os.getenv('USER') \
+    + " -constrain HoldReasonCode!=0 -format %s: ClusterId -format %s: ProcId -format %s\n Err"
 list = cmd.split(" ")
 p = subprocess.Popen(list,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
 (out, err) = p.communicate()
@@ -121,6 +165,7 @@ out = out.replace('.err','')
 lines = out.split("\n") 
 for line in lines:
     f = line.split(":")
+    print ' Line: ' + line
 
     if len(f) < 2:
         continue

@@ -23,12 +23,13 @@ echo " "
 echo -n " Press <return> to see the error logs. "
 read continue
 
-errors=`$cHeld -format "%s" ClusterId -format ":%s" Err -format ":%s\n" HoldReason|tr -s ' '|tr ' ' '+' `
+errors=`$cHeld -format "%s" ClusterId -format ":%s" ProcId -format ":%s" Err -format ":%s\n" HoldReason|tr -s ' '|tr ' ' '+' `
 for error in $errors
 do
   #echo "analyze: $error"
-  clusterId=` echo $error | cut -d: -f1`
-  errFile=`   echo $error | cut -d: -f2`
+  clusterId=`echo $error | cut -d: -f1`
+  procId=`   echo $error | cut -d: -f2`
+  errFile=`  echo $error | cut -d: -f3`
 
   if ! [ -z "$PATTERN" ]
   then
@@ -99,14 +100,15 @@ do
   fi
 
   echo ""
+  echo " rm $logFile $outFile $errFile; condor_rm $clusterId.$procId"
+  echo ""
   echo -n " Remove this held job? [N/y] "
   read remove
   if [ "$remove" == "y" ]
   then
     echo " Removing this job."
-    echo " rm $logFile $outFile $errFile; condor_rm $clusterId"
     rm $logFile $outFile $errFile
-    condor_rm $clusterId
+    condor_rm $clusterId.$procId
   fi
 
 done
