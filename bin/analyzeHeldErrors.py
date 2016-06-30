@@ -2,6 +2,29 @@
 #==================================================================================================
 import os,sys,subprocess
 
+def addSite(siteTag,nErrsSites):
+    if siteTag in nErrsSites:
+        nErrsSites[siteTag] += 1
+    else:
+        nErrsSites[siteTag] = 1
+    return nErrsSites
+
+def addError(nErrsSitesTypes):
+
+    return nErrsSitesTypes
+
+def addErrorAtSite(errorTag,siteTag,nErrsSitesTypes):
+    
+    if errorTag in nErrsSitesTypes:
+        nErrsSitesType[errorTag] = addSite(siteTag,nErrsSitesType[errorTag])
+    else:
+        # first appearence of error tag
+        nErrsSites = {}
+        nErrsSites[siteTag] = 1
+        nErrsSitesTypes[errorTag] = nErrsSites
+ 
+    return nErrsSitesTypes
+
 def findHeldJobStubs(debug=0):
     # find all job file stubs (without .err/.out extensions) to analyze
 
@@ -68,6 +91,8 @@ errValues = {}
 for tag,value in errPatterns.iteritems():
     errCounts[tag] = 0
     errValues[tag] = ''
+
+nErrsSitesTypes = {}
 
 # get the job file stubs to analyze
 stubs = findHeldJobStubs(debug)
