@@ -3,20 +3,19 @@
 import os,sys,subprocess
 
 def addSite(siteTag,nErrsSites):
+    # add a new site to the mix
+
     if siteTag in nErrsSites:
         nErrsSites[siteTag] += 1
     else:
         nErrsSites[siteTag] = 1
     return nErrsSites
 
-def addError(nErrsSitesTypes):
-
-    return nErrsSitesTypes
-
 def addErrorAtSite(errorTag,siteTag,nErrsSitesTypes):
-    
+    # add one error count for a given error type at a given site
+
     if errorTag in nErrsSitesTypes:
-        nErrsSitesType[errorTag] = addSite(siteTag,nErrsSitesType[errorTag])
+        nErrsSitesTypes[errorTag] = addSite(siteTag,nErrsSitesTypes[errorTag])
     else:
         # first appearence of error tag
         nErrsSites = {}
@@ -24,6 +23,31 @@ def addErrorAtSite(errorTag,siteTag,nErrsSitesTypes):
         nErrsSitesTypes[errorTag] = nErrsSites
  
     return nErrsSitesTypes
+
+def printErrorAtSite(nErrsSitesTypes):
+
+    # find all site tags
+    siteTags = []
+    for errTag,nErrsSite in nErrsSitesTypes.iteritems():
+        for siteTag in nErrsSite:
+            if siteTag not in siteTags:
+                siteTags.append(siteTag)
+
+    sys.stdout.write(" %-10s "%('=========='))
+    for siteTag in siteTags:
+        sys.stdout.write("%10s "%siteTag[:10])        
+
+
+    for errTag,nErrsSite in nErrsSitesTypes.iteritems():
+        sys.stdout.write("\n %-10s "%errTag)
+        for siteTag in siteTags:
+            if siteTag in nErrsSite:
+                sys.stdout.write("%10d "%(nErrsSite[siteTag]))
+            else:
+                sys.stdout.write("%10d "%(0))
+    print ''
+
+    return
 
 def findHeldJobStubs(debug=0):
     # find all job file stubs (without .err/.out extensions) to analyze
@@ -123,6 +147,7 @@ for stub in stubs:
                         siteName = line.replace('\n','')                       
                         siteName = siteName.replace('GLIDEIN_ResourceName=','')
  
+    errTag = 'ud'
     lError = False
     if debug > 1:
         print " Open: %s"%(stub+'.err')
@@ -131,6 +156,7 @@ for stub in stubs:
             for tag,value in errPatterns.iteritems():
                 if value in line:
                     lError = True
+                    errTag = tag
                     errCounts[tag] += 1
                     #errValues[tag] += line
 
@@ -141,6 +167,9 @@ for stub in stubs:
 
     if lError:
         nErrsSites[siteName] += 1
+
+    if errTag != 'ud':
+        nErrSitesTypes = addErrorAtSite(errTag,siteName,nErrsSitesTypes)
 
 print ''
 print ' ---- ERROR SUMMARY ----'
@@ -167,6 +196,9 @@ print '  %-25s: %4d'%('TOTAL',nTotal)
 print ' ================================'
 print ''
 
+print ' Error Matrix'
+printErrorAtSite(nErrsSitesTypes)
+print ''
 
 if len(sys.argv) < 2:
     print ' End (%d)'%(len(sys.argv))

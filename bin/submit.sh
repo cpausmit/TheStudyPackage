@@ -139,10 +139,12 @@ do
 cat > submit.cmd <<EOF
 Universe                = vanilla
 Environment             = "HOSTNAME=$HOSTNAME"
-Requirements            = (UidDomain == "cmsaf.mit.edu" || UidDomain == "mit.edu") && Arch == "X86_64" && \
-                           Disk >= DiskUsage && (Memory * 1024) >= ImageSize && HasFileTransfer &&  \
-                           Disk >= (10000 * 1024) && machine != "t3btch039.mit.edu" && machine != "t3btch008.mit.edu"
-## && Machine != "t3btch039.mit.edu"
+Requirements            = ( ( isUndefined(IS_GLIDEIN) ) \
+                            || ( OSGVO_OS_STRING == "RHEL 6" ) \
+                            || ( GLIDEIN_REQUIRED_OS == "rhel6" ) ) \
+                        && \
+                          ( isUndefined(CVMFS_cms_cern_ch_REVISION) \
+                            || (CVMFS_cms_cern_ch_REVISION >= 21812) )
 Notification            = Error
 Executable              = $script
 Arguments               = $TASK $gpack $qcut

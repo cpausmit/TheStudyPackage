@@ -102,10 +102,10 @@ cat > submit.cmd <<EOF
 Universe                = vanilla
 Environment             = "HOSTNAME=$HOSTNAME"
 Requirements            = ( ( isUndefined(IS_GLIDEIN) ) \
-                            || ( OSGVO_OS_STRING == "RHEL 6" && CVMFS_cms_cern_ch_REVISION >= 21812 ) \
+                            || ( OSGVO_OS_STRING == "RHEL 6" ) \
                             || ( GLIDEIN_REQUIRED_OS == "rhel6" ) ) \
-                          && Arch == "X86_64" \
-                          && HasFileTransfer
+                          && ( isUndefined(CVMFS_cms_cern_ch_REVISION) \
+                            || (CVMFS_cms_cern_ch_REVISION >= 21812) )
 Notification            = Error
 Executable              = $script
 Arguments               = $TASK $gpack

@@ -5,5 +5,5 @@ set run_card iseed           XX-SEED-XX
 set param_card mass  9900032 XX-MED-XX
 set param_card mass  9100012 XX-DM-XX
 #compute_widths       9000032
-#set param_card width 9900032 auto
+set param_card width 9900032 auto
 done
