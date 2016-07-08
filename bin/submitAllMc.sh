@@ -11,7 +11,8 @@ echo "Starting data processing with arguments:"
 echo "  --> $*"
 
 BASE=/cms/store/user/paus
-CONFIG="$1"; VERSION="$2"; TASK=`echo $3|cut -d\. -f1`; LIST=`echo $3|cut -d\. -f2`; OUTDIR=$4; LOGDIR=$5
+CONFIG="$1"; VERSION="$2";
+TASK=`echo $3|cut -d\. -f1`; LIST=`echo $3|cut -d\. -f2`; OUTDIR=$4; LOGDIR=$5
 CORE=$CONFIG/$VERSION
 if [ "$#" -gt 5 ]
 then

@@ -118,10 +118,14 @@ function setupCmssw {
   # prepare the python config from the given template, if needed
   if [ -e "$BASEDIR/$VERSION/python/${THIS_PY}.py-template" ]
   then 
+    cd $WORKDIR
+    echo " create ${THIS_PY}.py from template $BASEDIR/$VERSION/python/${THIS_PY}.py-template"
     cat $BASEDIR/$VERSION/python/${THIS_PY}.py-template \
         | sed "s@XX-HADRONIZER-XX@$HADRONIZER@g" \
         | sed "s@XX-FILE_TRUNC-XX@${TASK}_${GPACK}@g" \
         > ${THIS_PY}.py
+  else
+    echo " no template $BASEDIR/$VERSION/python/${THIS_PY}.py-template found"
   fi
 
   echo "============================================================"

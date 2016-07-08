@@ -1,0 +1,6 @@
+import axial_monoW_model
+generate    p p  > ~n1 Xn1 w-
+add process p p  > ~n1 Xn1 w- j
+add process p p  > ~n1 Xn1 w+  
+add process p p  > ~n1 Xn1 w+ j
+output madgraph-generator -nojpeg

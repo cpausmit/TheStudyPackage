@@ -12,8 +12,7 @@ export GPACK="$4"
 
 # make sure we are locked and loaded
 [ -d "./bin" ] || ( tar fzx default.tgz; rm default.tgz )        # make sure to cleanup right away
-BASEDIR=`pwd`
-export BASEDIR
+export BASEDIR=`pwd`
 source ./bin/helpers.sh
 
 # tell us the initial state
@@ -165,7 +164,7 @@ else
   # unknown config
   ################
 
-  echo " ERROR -- config: $CONFIGURE not known."
+  echo " ERROR -- config: $CONFIG not known."
   exit 1
 
 fi
@@ -174,8 +173,8 @@ fi
 ####################################################################################################
 # miniaodsim step
 ####################################################################################################
-
 # initialize MINIAOD step
+
 setupCmssw $MIN_CMSSW_VERSION $MIN_PY
 executeCmd time cmsRun ${MIN_PY}.py
 if ! [ -e "${TASK}_${GPACK}_miniaodsim.root" ]
@@ -194,7 +193,7 @@ showDiskSpace
 
 setupCmssw $BAM_CMSSW_VERSION $BAM_PY
 
-# unpack the additional tar
+# unpack the additional tarball
 cd CMSSW_$BAM_CMSSW_VERSION
 executeCmd tar fzx $BASEDIR/$VERSION/tgz/bambu_${BAM_CMSSW_VERSION}.tgz
 cd $WORKDIR
