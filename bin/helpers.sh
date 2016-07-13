@@ -121,6 +121,7 @@ function setupCmssw {
     cd $WORKDIR
     echo " create ${THIS_PY}.py from template $BASEDIR/$VERSION/python/${THIS_PY}.py-template"
     cat $BASEDIR/$VERSION/python/${THIS_PY}.py-template \
+        | sed "s@XX-SEED-XX@$SEED@g" \
         | sed "s@XX-HADRONIZER-XX@$HADRONIZER@g" \
         | sed "s@XX-FILE_TRUNC-XX@${TASK}_${GPACK}@g" \
         > ${THIS_PY}.py

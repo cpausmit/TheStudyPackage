@@ -76,6 +76,7 @@ echo " Initialize CMSSW for Gen - $GEN_CMSSW_VERSION -> $GEN_PY"
 
 # prepare the python config from the given templates
 cat $BASEDIR/python/${GEN_PY}.py-template \
+    | sed "s@XX-SEED-XX@$SEED@g" \
     | sed "s@XX-HADRONIZER-XX@$HADRONIZER@g" \
     | sed "s@XX-FILE_TRUNC-XX@${TASK}_${GPACK}@g" \
     > ${GEN_PY}.py

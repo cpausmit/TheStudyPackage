@@ -12,6 +12,8 @@ export GPACK="$4"
 
 # make sure we are locked and loaded
 [ -d "./bin" ] || ( tar fzx default.tgz; rm default.tgz )        # make sure to cleanup right away
+export SEED=`echo $GPACK | sed -e 's@.*_seed-@@' -e 's@_.*@@'`
+echo SEED: $SEED
 export BASEDIR=`pwd`
 source ./bin/helpers.sh
 
@@ -23,7 +25,7 @@ echo " Initialize package"
 source $BASEDIR/$VERSION/${TASK}.env
 
 # make sure to contain file mess
-mkdir ./work
+mkdir -p ./work
 cd    ./work
 export WORKDIR=`pwd`
 

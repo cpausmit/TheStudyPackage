@@ -21,7 +21,10 @@ process.maxEvents = cms.untracked.PSet(
 )
 
 # Input source
-process.source = cms.Source("LHESource",fileNames = cms.untracked.vstring('file:XX-FILE_TRUNC-XX.lhe')
+process.source = cms.Source(
+  "LHESource",
+  fileNames = cms.untracked.vstring('file:XX-FILE_TRUNC-XX.lhe'),
+  firstEvent = cms.untracked.uint32(XX-SEED-XX*1000)
 )
 
 process.options = cms.untracked.PSet(
