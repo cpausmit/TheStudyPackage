@@ -55,13 +55,13 @@ executeCmd tar fzx $BASEDIR/generators/$GENERATOR.tgz
 echo " INFO -- using generator type: $GENERATOR_TYPE"
 if   [ "$GENERATOR_TYPE" == "powheg" ]
 then
-  executeCmd time $BASEDIR/bin/runPowheg.sh $TASK $GPACK
+  executeCmd $TIME $BASEDIR/bin/runPowheg.sh $TASK $GPACK
 elif [ "$GENERATOR_TYPE" == "madgraph" ]
 then
-  executeCmd time $BASEDIR/bin/runMadgraph.sh $TASK $GPACK
+  executeCmd $TIME $BASEDIR/bin/runMadgraph.sh $TASK $GPACK
 elif [ "$GENERATOR_TYPE" == "jhu" ]
 then
-  executeCmd time $BASEDIR/bin/runJHU.sh $TASK $GPACK
+  executeCmd $TIME $BASEDIR/bin/runJHU.sh $TASK $GPACK
 else
   echo " ERROR -- generator type is not known (\$GENERATOR_TYPE=$GENERATOR_TYPE)"
   echo "          EXIT now because there is no LHE file."
@@ -76,7 +76,7 @@ showDiskSpace
 
 # initialize GEN step
 setupCmssw $GEN_CMSSW_VERSION $GEN_PY
-executeCmd time cmsRun ${GEN_PY}.py
+executeCmd $TIME cmsRun ${GEN_PY}.py
 if ! [ -e "${TASK}_${GPACK}_gen.root" ]
 then
   echo " ERROR -- generation failed. No output file: ${TASK}_${GPACK}_gen.root"
@@ -98,7 +98,7 @@ then
 
   # initialize
   setupCmssw $FSM_CMSSW_VERSION $FSM_PY
-  executeCmd time cmsRun ${FSM_PY}.py
+  executeCmd $TIME cmsRun ${FSM_PY}.py
   if ! [ -e "${TASK}_${GPACK}_aodsim.root" ]
   then
     echo " ERROR -- fast simulation failed. No output file: ${TASK}_${GPACK}_aodsim.root"
@@ -108,7 +108,7 @@ then
 
   showDiskSpace
 
-  # now aodsim is available, time to cleanup LHE and gen
+  # now aodsim is available, $TIME to cleanup LHE and gen
 
   exeCmd rm $WORKDIR/${TASK}_${GPACK}.lhe $WORKDIR/${TASK}_${GPACK}_gen.root
 
@@ -122,7 +122,7 @@ then
 
   # initialize
   setupCmssw $SIM_CMSSW_VERSION $SIM_PY
-  executeCmd time cmsRun ${SIM_PY}.py
+  executeCmd $TIME cmsRun ${SIM_PY}.py
   if ! [ -e "${TASK}_${GPACK}_gensim.root" ]
   then
     echo " ERROR -- simulation step failed. No output file: ${TASK}_${GPACK}_gensim.root"
@@ -134,7 +134,7 @@ then
 
   # initialize
   setupCmssw $SMR_CMSSW_VERSION $SMR_PY
-  executeCmd time cmsRun ${SMR_PY}.py
+  executeCmd $TIME cmsRun ${SMR_PY}.py
   if ! [ -e "${TASK}_${GPACK}_simraw.root" ]
   then
     echo " ERROR -- simraw step failed. No output file: ${TASK}_${GPACK}_simraw.root"
@@ -146,7 +146,7 @@ then
   
   # initialize
   setupCmssw $DGR_CMSSW_VERSION $DGR_PY
-  executeCmd time cmsRun ${DGR_PY}.py
+  executeCmd $TIME cmsRun ${DGR_PY}.py
   if ! [ -e "${TASK}_${GPACK}_aodsim.root" ]
   then
     echo " ERROR -- digireco failed. No output file: ${TASK}_${GPACK}_aodsim.root"
@@ -156,7 +156,7 @@ then
 
   showDiskSpace
 
-  # now aodsim is available, time to cleanup LHE and gen
+  # now aodsim is available, $TIME to cleanup LHE and gen
   exeCmd rm $WORKDIR/${TASK}_${GPACK}.lhe $WORKDIR/${TASK}_${GPACK}_gen.root \
             $WORKDIR/${TASK}_${GPACK}_gensim.root $WORKDIR/${TASK}_${GPACK}_simraw.root
   
@@ -178,7 +178,7 @@ fi
 # initialize MINIAOD step
 
 setupCmssw $MIN_CMSSW_VERSION $MIN_PY
-executeCmd time cmsRun ${MIN_PY}.py
+executeCmd $TIME cmsRun ${MIN_PY}.py
 if ! [ -e "${TASK}_${GPACK}_miniaodsim.root" ]
 then
   echo " ERROR -- miniaodsim failed. No output file: ${TASK}_${GPACK}_miniaodsim.root"
@@ -200,7 +200,7 @@ cd CMSSW_$BAM_CMSSW_VERSION
 executeCmd tar fzx $BASEDIR/$VERSION/tgz/bambu_${BAM_CMSSW_VERSION}.tgz
 cd $WORKDIR
 
-executeCmd time cmsRun ${BAM_PY}.py
+executeCmd $TIME cmsRun ${BAM_PY}.py
 # this is a little naming issue that has to be fixed
 mv ${TASK}_${GPACK}_bambu*  ${TASK}_${GPACK}_bambu.root
 if ! [ -e "${TASK}_${GPACK}_bambu.root" ]
@@ -235,7 +235,7 @@ voms-proxy-info -all
 for file in `echo ${TASK}_${GPACK}_bambu* ${TASK}_${GPACK}_miniaodsim*`
 do
   # now do the copy
-  executeCmd time ./cmscp.py \
+  executeCmd $TIME ./cmscp.py \
     --middleware OSG --PNN $REMOTE_SERVER --se_name $REMOTE_SERVER \
     --inputFileList $pwd/${file} \
     --destination srm://$REMOTE_SERVER:8443/${REMOTE_BASE}${REMOTE_USER_DIR}/${TASK}_${sample} \

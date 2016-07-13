@@ -57,8 +57,8 @@ cd -
 pwd=`pwd`
 
 # make sure directory exists
-executeCmd time python ./PyCox/pycox.py --action mkdir --source /cms/store$USER_DIR/${TASK}
-executeCmd time python ./PyCox/pycox.py --action up --source ${TASK}_${GPACK}.copy \
+executeCmd $TIME python ./PyCox/pycox.py --action mkdir --source /cms/store$USER_DIR/${TASK}
+executeCmd $TIME python ./PyCox/pycox.py --action up --source ${TASK}_${GPACK}.copy \
                         --target /cms/store$USER_DIR/${TASK}/${TASK}_${GPACK}.copy
 
 executeCmd mv ${TASK}_${GPACK}.copy ../

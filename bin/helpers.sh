@@ -1,3 +1,5 @@
+export TIME=`which time`
+
 function exeCmd {
   # provide a small frame for each command, also allows further steering
   echo " Executing: $*"

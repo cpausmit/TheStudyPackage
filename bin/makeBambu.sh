@@ -72,7 +72,7 @@ executeCmd tar fzx $BASEDIR/$VERSION/tgz/bambu_${BAM_CMSSW_VERSION}.tgz
 cd $WORKDIR
 
 # run bambu making
-executeCmd time cmsRun ${BAM_PY}.py
+executeCmd $TIME cmsRun ${BAM_PY}.py
 
 # this is a little naming issue that has to be fixed
 mv bambu-output-file-tmp*.root  ${GPACK}_tmp.root
@@ -113,7 +113,7 @@ do
   # always first show the proxy
   voms-proxy-info -all
   # now do the copy
-  executeCmd time ./cmscp.py \
+  executeCmd $TIME ./cmscp.py \
     --middleware OSG --PNN $REMOTE_SERVER --se_name $REMOTE_SERVER \
     --inputFileList $pwd/${file} \
     --destination srm://$REMOTE_SERVER:8443/${REMOTE_BASE}${REMOTE_USER_DIR}/${TASK}/${CRAB} \

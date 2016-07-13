@@ -2,7 +2,7 @@
                   'glidein': "GLIDEIN_ResourceName",
                   'glideinSe': "GLIDEIN_SEs"
                 },
- 'errPatterns': { 'xrdFailOpen': "Failed to open the file",
+ 'errPatterns': { 'xrdFailOpn': "Failed to open the file",
                   'xrdExpired': "[ERROR] Operation expired",
                   'xrdFatal': "[FATAL] Redirect limit has been reached",
 		  'xrdServer': "[ERROR] Server responded with an error:",
@@ -14,6 +14,7 @@
                   'memoryAlloc': "cannot allocate memory",
                   'space': "No space left on device",
                   'io': "Input/output error",
-                  'cvmfs': "/cvmfs/cms.cern.ch/cmsset_default.sh: No such file or director"
+                  'cvmfs': "/cvmfs/cms.cern.ch/cmsset_default.sh: No such file or director",
+		  'time': "time: command not found",
 		}
 }

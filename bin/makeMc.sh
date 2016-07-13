@@ -48,13 +48,13 @@ executeCmd tar fzx $BASEDIR/generators/$GENERATOR.tgz
 echo " INFO -- using generator type: $GENERATOR_TYPE"
 if   [ "$GENERATOR_TYPE" == "powheg" ]
 then
-  executeCmd time $BASEDIR/bin/runPowheg.sh $TASK $GPACK
+  executeCmd $TIME $BASEDIR/bin/runPowheg.sh $TASK $GPACK
 elif [ "$GENERATOR_TYPE" == "madgraph" ]
 then
-  executeCmd time $BASEDIR/bin/runMadgraph.sh $TASK $GPACK
+  executeCmd $TIME $BASEDIR/bin/runMadgraph.sh $TASK $GPACK
 elif [ "$GENERATOR_TYPE" == "jhu" ]
 then
-  executeCmd time $BASEDIR/bin/runJHU.sh $TASK $GPACK
+  executeCmd $TIME $BASEDIR/bin/runJHU.sh $TASK $GPACK
 else
   echo " ERROR -- generator type is not known (\$GENERATOR_TYPE=$GENERATOR_TYPE)"
   echo "          EXIT now because there is no LHE file."
@@ -81,7 +81,7 @@ cat $BASEDIR/python/${GEN_PY}.py-template \
     | sed "s@XX-FILE_TRUNC-XX@${TASK}_${GPACK}@g" \
     > ${GEN_PY}.py
 
-executeCmd time cmsRun ${GEN_PY}.py
+executeCmd $TIME cmsRun ${GEN_PY}.py
 
 if ! [ -e "${TASK}_${GPACK}_gen.root" ]
 then
@@ -109,7 +109,7 @@ cat $BASEDIR/python/${SIM_PY}.py-template \
     | sed "s@XX-FILE_TRUNC-XX@${TASK}_${GPACK}@g" \
     > ${SIM_PY}.py
 
-executeCmd time cmsRun ${SIM_PY}.py
+executeCmd $TIME cmsRun ${SIM_PY}.py
 
 if ! [ -e "${TASK}_${GPACK}_aodsim.root" ]
 then
@@ -140,7 +140,7 @@ cat $BASEDIR/python/${MIN_PY}.py-template \
     | sed "s@XX-FILE_TRUNC-XX@${TASK}_${GPACK}@g" \
     > ${MIN_PY}.py
 
-executeCmd time cmsRun ${MIN_PY}.py
+executeCmd $TIME cmsRun ${MIN_PY}.py
 
 if ! [ -e "${TASK}_${GPACK}_miniaodsim.root" ]
 then
@@ -174,7 +174,7 @@ cat $BASEDIR/python/${BAM_PY}.py-template \
     | sed "s@XX-FILE_TRUNC-XX@${TASK}_${GPACK}@g" \
     > ${BAM_PY}.py
 
-executeCmd time cmsRun ${BAM_PY}.py
+executeCmd $TIME cmsRun ${BAM_PY}.py
 # this is a little naming issue that has to be fixed
 mv ${TASK}_${GPACK}_bambu*  ${TASK}_${GPACK}_bambu.root
 
@@ -210,7 +210,7 @@ voms-proxy-info -all
 for file in `echo ${TASK}_${GPACK}_bambu* ${TASK}_${GPACK}_miniaodsim*`
 do
   # now do the copy
-  executeCmd time ./cmscp.py \
+  executeCmd $TIME ./cmscp.py \
     --middleware OSG --PNN $REMOTE_SERVER --se_name $REMOTE_SERVER \
     --inputFileList $pwd/${file} \
     --destination srm://$REMOTE_SERVER:8443/${REMOTE_BASE}${REMOTE_USER_DIR}/${TASK}_${sample} \
