@@ -81,11 +81,11 @@ script=$LOGDIR/$TASK/makeAllMc.sh
 newProxy
 
 # Make a record of completed jobs and directories
-list $BASE/$CORE/${TASK}_* > /tmp/done.$$
+done=`list $BASE/$CORE/${TASK}_*`
 
 # Make a record of ongoing jobs
-condor_q -global $USER -format "%s " Cmd -format "%s \n" Args \
-  | grep `basename $script` > /tmp/condorQueue.$$
+myScript=`basename $script`
+condorQueue=`condor_q -global $USER -format "%s " Cmd -format "%s \n" Args 2> /dev/null|grep $myScript`
 
 # Looping through each single fileset and submitting the condor jobs
 echo ""
@@ -127,7 +127,7 @@ nD=0; nQ=0; nS=0
 for gpack in `cat ./$VERSION/${TASK}.${LIST}`
 do
 
-  inQueue=`grep "$gpack" /tmp/condorQueue.$$ | grep $TASK`
+  inQueue=`echo $condorQueue | grep "$gpack" | grep $TASK`
   if [ "$inQueue" != "" ]
   then
     echo " Queued: $gpack"
@@ -138,7 +138,7 @@ do
   # an emtpy tag to trigger a condor error (will be kept in HELD state)
   outputFiles=${TASK}_${gpack}.empty
 
-  exists=`grep ${TASK}_${gpack}_bambu.root /tmp/done.$$`
+  exists=`echo $done | grep ${TASK}_${gpack}_bambu.root`
   complete=1
   if [ "$exists" == "" ]
   then
@@ -162,9 +162,6 @@ do
   echo "transfer_output_files   = $outputFiles"			 >> submit.cmd.$$
   echo "Queue"                                                   >> submit.cmd.$$
 done
-
-# clean up
-rm -f /tmp/done.$$ /tmp/condorQueue.$$
 
 echo ""
 echo " =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
