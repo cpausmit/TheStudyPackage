@@ -81,11 +81,11 @@ script=$LOGDIR/$TASK/makeAllMc.sh
 newProxy
 
 # Make a record of completed jobs and directories
-done=`list $BASE/$CORE/${TASK}_*`
+list $BASE/$CORE/${TASK}_* > /tmp/done.$$
 
 # Make a record of ongoing jobs
-myScript=`basename $script`
-condorQueue=`condor_q -global $USER -format "%s " Cmd -format "%s \n" Args 2> /dev/null|grep $myScript`
+condor_q -global $USER -format "%s " Cmd -format "%s \n" Args \
+  | grep `basename $script` > /tmp/condorQueue.$$
 
 # Looping through each single fileset and submitting the condor jobs
 echo ""
@@ -96,11 +96,11 @@ cat > submit.cmd.$$ <<EOF
 Universe                = vanilla
 Environment             = "HOSTNAME=$HOSTNAME"
 Requirements            = ( ( isUndefined(IS_GLIDEIN) ) \
-                            || ( OSGVO_OS_STRING == "RHEL 6" ) \
+                            || ( ( OSGVO_OS_STRING == "RHEL 6" ) && ( GLIDEIN_Site != "NPX" ) ) \
                             || ( GLIDEIN_REQUIRED_OS == "rhel6" ) ) \
                         && \
                           ( isUndefined(CVMFS_cms_cern_ch_REVISION) \
-                            || (CVMFS_cms_cern_ch_REVISION >= 21812) )
+                            || (CVMFS_cms_cern_ch_REVISION >= 21812) ) 
 Request_Memory          = 2.0 GB
 Request_Disk            = 5 GB
 Notification            = Error
@@ -127,7 +127,7 @@ nD=0; nQ=0; nS=0
 for gpack in `cat ./$VERSION/${TASK}.${LIST}`
 do
 
-  inQueue=`echo $condorQueue | grep "$gpack" | grep $TASK`
+  inQueue=`grep "$gpack" /tmp/condorQueue.$$ | grep $TASK`
   if [ "$inQueue" != "" ]
   then
     echo " Queued: $gpack"
@@ -138,7 +138,7 @@ do
   # an emtpy tag to trigger a condor error (will be kept in HELD state)
   outputFiles=${TASK}_${gpack}.empty
 
-  exists=`echo $done | grep ${TASK}_${gpack}_bambu.root`
+  exists=`grep ${TASK}_${gpack}_bambu.root /tmp/done.$$`
   complete=1
   if [ "$exists" == "" ]
   then
@@ -162,6 +162,9 @@ do
   echo "transfer_output_files   = $outputFiles"			 >> submit.cmd.$$
   echo "Queue"                                                   >> submit.cmd.$$
 done
+
+# clean up
+rm -f /tmp/done.$$ /tmp/condorQueue.$$
 
 echo ""
 echo " =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
