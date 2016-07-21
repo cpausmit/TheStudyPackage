@@ -96,7 +96,7 @@ cat > submit.cmd.$$ <<EOF
 Universe                = vanilla
 Environment             = "HOSTNAME=$HOSTNAME"
 Requirements            = ( ( isUndefined(IS_GLIDEIN) ) \
-                            || ( OSGVO_OS_STRING == "RHEL 6" ) \
+                            || ( ( OSGVO_OS_STRING == "RHEL 6" ) && ( GLIDEIN_Site != "NPX" ) ) \
                             || ( GLIDEIN_REQUIRED_OS == "rhel6" ) ) \
                         && \
                           ( isUndefined(CVMFS_cms_cern_ch_REVISION) \
