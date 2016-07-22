@@ -16,5 +16,6 @@
                   'io': "Input/output error",
                   'cvmfs': "/cvmfs/cms.cern.ch/cmsset_default.sh: No such file or director",
 		  'time': "time: command not found",
+                  'illegal': "*** Break *** illegal instruction",
 		}
 }

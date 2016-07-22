@@ -95,12 +95,11 @@ echo ""
 cat > submit.cmd.$$ <<EOF
 Universe                = vanilla
 Environment             = "HOSTNAME=$HOSTNAME"
+# decide where this goes
 Requirements            = ( ( isUndefined(IS_GLIDEIN) ) \
-                            || ( OSGVO_OS_STRING == "RHEL 6" ) \
-                            || ( GLIDEIN_REQUIRED_OS == "rhel6" ) ) \
-                        && \
-                          ( isUndefined(CVMFS_cms_cern_ch_REVISION) \
-                            || (CVMFS_cms_cern_ch_REVISION >= 21812) )
+                            || ( OSGVO_OS_STRING == "RHEL 6" && HAS_CVMFS_cms_cern_ch == True ) \
+                            || ( GLIDEIN_REQUIRED_OS == "rhel6" ) )
+
 Request_Memory          = 2.0 GB
 Request_Disk            = 5 GB
 Notification            = Error

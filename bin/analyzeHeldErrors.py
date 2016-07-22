@@ -71,6 +71,8 @@ def findHeldJobStubs(debug=0):
     out = out.replace('.err','')
     stubs = out.split(":") 
 
+    print ' Number of held jobs found: %d'%(len(stubs))
+
     return stubs
 
 def readPatterns(debug=0):
@@ -199,6 +201,25 @@ print ''
 print ' Error Matrix'
 printErrorAtSite(nErrsSitesTypes)
 print ''
+
+answer = raw_input('Wanna watch error files? [N/y] ')
+
+# go through the error files
+for stub in stubs:
+
+    if stub == '':
+        continue
+    if not os.path.exists(stub+'.out') or  not os.path.exists(stub+'.err'):
+        print ' Output/Error file not available: ' + stub
+        continue
+
+    if debug > 1:
+        print " Open: %s"%(stub+'.err')
+    with open(stub+'.err',"r") as f:
+        for line in f:
+            print line[:-1]
+        print ' File: %s.%s'%(stub,'err')
+        answer = raw_input('Remove this held job? [N/y] ')
 
 if len(sys.argv) < 2:
     print ' End (%d)'%(len(sys.argv))
