@@ -95,8 +95,9 @@ echo ""
 cat > submit.cmd.$$ <<EOF
 Universe                = vanilla
 Environment             = "HOSTNAME=$HOSTNAME"
+
 # decide where this goes
-Requirements            = ( ( isUndefined(IS_GLIDEIN) ) \
+Requirements            = ( isUndefined(IS_GLIDEIN) ) \
                             || ( OSGVO_OS_STRING == "RHEL 6" && HAS_CVMFS_cms_cern_ch == True ) \
                             || ( GLIDEIN_REQUIRED_OS == "rhel6" ) )
 
